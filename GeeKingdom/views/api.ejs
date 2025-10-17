@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeeKingdom</title>
+    <link rel="stylesheet" href="/styles/main.css">
+</head>
+<body>
+    <h1>GeeKingdom API</h1>
+    <p>Welcome to the GeeKingdom API endpoint. Here you can access various data
+    related to our services.</p>
+    <h2>Available Endpoints:</h2>
+    <ul>
+        <% data.forEach(function(item) { %>
+            <li><strong><%= item %></li>
+        <% }); %>
+    </ul>
+    <a href="/">Back to Home</a>
+</body>
+</html>
