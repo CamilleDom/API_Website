@@ -1,33 +1,47 @@
+// server.js (ES Module)
 import express from 'express';
-import fetch from 'node-fetch';
+import cors from 'cors';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const PORT = process.env.PORT || 5000;
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 
-// Configurer EJS comme moteur de rendu
-app.set('view engine', 'ejs');
+// Middleware
+app.use(cors());
+app.use(express.json());
 
-//Servir les fichiers statiques (CSS,JS clients)
-app.use(express.static('public'));
-
-//Page d'accueil
-app.get('/', (req, res) => {
-    res.render('index', { title: 'Bienvenue à GeeKingdom' });
+// Exemple de route pour tester le back-end Node
+app.get('/api/test', (req, res) => {
+  res.json({ message: 'Serveur Express fonctionne !' });
 });
 
-// Route pour appeler l'API Spring Boot
-app.get('/api/data', async (req, res) => {
-    try {
-        const response = await fetch('http://localhost:8080/api/data');
-        const data = await response.json();
-        res.render('api', { data });
-    } catch (error) {
-        console.error('Erreur lors de la récupération des données de l\'API:', error);
-        res.status(500).send('Erreur serveur');
-    }
+// === Proxy vers ton API Java Spring Boot ===
+app.get('/api/java/:endpoint', async (req, res) => {
+  try {
+    const endpoint = req.params.endpoint;
+    const response = await fetch(`http://localhost:8080/${endpoint}`); // ton API Java
+    const data = await response.json();
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ error: 'Erreur lors de la communication avec l’API Java' });
+  }
 });
 
-// Démarrer le serveur
-const PORT = process.env.PORT || 3000;
+// === Production: servir le build React ===
+if (process.env.NODE_ENV === 'production') {
+  const clientBuildPath = path.join(__dirname, 'client', 'build');
+  app.use(express.static(clientBuildPath));
+
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(clientBuildPath, 'index.html'));
+  });
+}
+
 app.listen(PORT, () => {
-    console.log(`Serveur démarré sur le port ${PORT}`);
+  console.log(`Serveur Node en écoute sur http://localhost:${PORT}`);
 });

@@ -1,38 +1,160 @@
-.App {
-  text-align: center;
+/* -------------------- */
+/* 🌈 Variables globales */
+/* -------------------- */
+:root {
+  --primary: #4f46e5;
+  --primary-light: #6366f1;
+  --secondary: #fbbf24;
+  --bg: #f9fafb;
+  --text: #111827;
+  --muted: #6b7280;
+  --radius: 8px;
+  --transition: 0.2s ease;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+/* -------------------- */
+/* 🔤 Styles de base     */
+/* -------------------- */
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background-color: var(--bg);
+  color: var(--text);
+  margin: 0;
+  padding: 0;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+a {
+  color: var(--primary);
+  text-decoration: none;
+  transition: color var(--transition);
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+a:hover {
+  color: var(--primary-light);
+}
+
+/* -------------------- */
+/* 🧭 Navbar             */
+/* -------------------- */
+nav {
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
   align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
+  background: var(--primary);
+  padding: 1rem 2rem;
   color: white;
 }
 
-.App-link {
-  color: #61dafb;
+nav a {
+  color: white;
+  margin: 0 1rem;
+  font-weight: 500;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
+nav a:hover {
+  color: var(--secondary);
+}
+
+/* -------------------- */
+/* ⚓ Footer             */
+/* -------------------- */
+footer {
+  background: var(--primary);
+  color: white;
+  text-align: center;
+  padding: 1rem;
+  margin-top: 2rem;
+}
+
+/* -------------------- */
+/* 🏠 Accueil & pages    */
+/* -------------------- */
+main {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+h1, h2, h3 {
+  color: var(--primary);
+}
+
+section {
+  text-align: center;
+  padding: 2rem 0;
+}
+
+/* -------------------- */
+/* 🛍️ Grille de produits */
+/* -------------------- */
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.product-card {
+  background: white;
+  border-radius: var(--radius);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  padding: 1rem;
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.product-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+}
+
+.product-card img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: var(--radius);
+}
+
+.product-card h3 {
+  margin: 0.5rem 0;
+  font-size: 1.1rem;
+}
+
+.product-card p {
+  color: var(--muted);
+  margin: 0.5rem 0;
+}
+
+/* -------------------- */
+/* 🛒 Boutons            */
+/* -------------------- */
+button {
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background var(--transition);
+}
+
+button:hover {
+  background: var(--primary-light);
+}
+
+/* -------------------- */
+/* 📱 Responsive         */
+/* -------------------- */
+@media (max-width: 768px) {
+  nav {
+    flex-direction: column;
+    gap: 0.5rem;
   }
-  to {
-    transform: rotate(360deg);
+
+  main {
+    padding: 1rem;
+  }
+
+  .products-grid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   }
 }
