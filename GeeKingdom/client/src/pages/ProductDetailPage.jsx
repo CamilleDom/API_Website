@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { useParams } from 'react-router-dom';
+import { CartContext } from '../context/CartContext';
 
 function ProductDetailPage() {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
+  const { addToCart } = useContext(CartContext);
 
   useEffect(() => {
     fetch(`/api/java/products/${id}`)
@@ -26,13 +28,13 @@ function ProductDetailPage() {
   if (!product) return <p>Produit introuvable.</p>;
 
   return (
-    <div>
+    <section>
       <h2>{product.name}</h2>
       <img src={product.image} alt={product.name} style={{ width: '300px' }} />
       <p>{product.description}</p>
       <p><strong>{product.price} €</strong></p>
-      <button>Ajouter au panier</button>
-    </div>
+      <button onClick={() => addToCart(product)}>Ajouter au panier</button>
+    </section>
   );
 }
 
