@@ -1,20 +1,24 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 function LoginPage() {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [loading, setLoading] = useState(false);
+  const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const from = location.state?.from?.pathname || '/';
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    setSuccess('');
 
     const { email, password } = formData;
 
@@ -23,46 +27,52 @@ function LoginPage() {
       return;
     }
 
-    // Ici, tu peux appeler ton API pour vérifier les identifiants
-    // Exemple simulé :
-    if (email === 'test@example.com' && password === '123456') {
-      setSuccess('Connexion réussie !');
-      setTimeout(() => navigate('/'), 1000); // redirection vers l’accueil
+    setLoading(true);
+
+    const result = await login(email, password);
+
+    if (result.success) {
+      navigate(from, { replace: true });
     } else {
-      setError('Email ou mot de passe incorrect.');
+      setError(result.error || 'Identifiants incorrects.');
     }
+
+    setLoading(false);
   };
 
   return (
-    <section style={{ maxWidth: '400px', margin: '2rem auto', padding: '1rem', border: '1px solid #ccc', borderRadius: '8px' }}>
-      <h2>Connexion</h2>
+    <section className="auth-page">
+      <div className="auth-container">
+        <h2>Connexion</h2>
 
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      {success && <p style={{ color: 'green' }}>{success}</p>}
+        {error && <p className="error-message">{error}</p>}
 
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          value={formData.email}
-          onChange={handleChange}
-        />
-        <input
-          type="password"
-          name="password"
-          placeholder="Mot de passe"
-          value={formData.password}
-          onChange={handleChange}
-        />
-        <button type="submit" style={{ padding: '0.5rem', background: '#222', color: '#fff', border: 'none', borderRadius: '4px' }}>
-          Se connecter
-        </button>
-      </form>
+        <form onSubmit={handleSubmit}>
+          <input
+            type="email"
+            name="email"
+            placeholder="Email"
+            value={formData.email}
+            onChange={handleChange}
+            required
+          />
+          <input
+            type="password"
+            name="password"
+            placeholder="Mot de passe"
+            value={formData.password}
+            onChange={handleChange}
+            required
+          />
+          <button type="submit" disabled={loading}>
+            {loading ? 'Connexion...' : 'Se connecter'}
+          </button>
+        </form>
 
-      <p style={{ marginTop: '1rem' }}>
-        Pas encore de compte ? <span style={{ color: '#007bff', cursor: 'pointer' }} onClick={() => navigate('/register')}>Inscrivez-vous ici</span>.
-      </p>
+        <p className="auth-link">
+          Pas encore de compte ? <Link to="/register">Inscrivez-vous ici</Link>
+        </p>
+      </div>
     </section>
   );
 }

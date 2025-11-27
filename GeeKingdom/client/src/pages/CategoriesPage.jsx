@@ -1,36 +1,65 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { categoriesAPI } from '../services/api';
+import Loader from '../components/Loader';
 
 function CategoriesPage() {
-  const [categories, setCategories] = useState([]); // par défaut un tableau
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    fetch('/api/java/categories')
-      .then(res => res.json())
-      .then(data => {
-        // Si ton API renvoie { categories: [...] }, il faut faire :
-        // setCategories(data.categories);
-        // Sinon si c’est déjà un tableau : setCategories(data);
-        setCategories(Array.isArray(data) ? data : data.categories || []);
-      })
-      .catch(err => {
+    const fetchCategories = async () => {
+      try {
+        const data = await categoriesAPI.getAll();
+        setCategories(data);
+      } catch (err) {
+        setError('Erreur lors du chargement des catégories.');
         console.error(err);
-        setCategories([]); // fallback
-      });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCategories();
   }, []);
 
-  if (!categories.length) return <p>Aucune catégorie trouvée.</p>;
+  if (loading) return <Loader message="Chargement des catégories..." />;
+  
+  if (error) return <p className="error-message">{error}</p>;
+
+  if (!categories.length) {
+    return (
+      <section>
+        <h2>Catégories</h2>
+        <p>Aucune catégorie trouvée.</p>
+      </section>
+    );
+  }
 
   return (
-    <section>
-      <h2>Catégories</h2>
-      <ul>
+    <section className="categories-page">
+      <h2>Nos Catégories</h2>
+      
+      <div className="categories-list">
         {categories.map(cat => (
-          <li key={cat.id}>
-            <Link to={`/products?category=${cat.id}`}>{cat.name}</Link>
-          </li>
+          <Link 
+            key={cat.idCategorie} 
+            to={`/products?category=${cat.idCategorie}`}
+            className="category-item"
+          >
+            <div className="category-content">
+              {cat.imageUrl && (
+                <img src={cat.imageUrl} alt={cat.nomCategorie} />
+              )}
+              <div className="category-info">
+                <h3>{cat.nomCategorie}</h3>
+                {cat.description && <p>{cat.description}</p>}
+              </div>
+            </div>
+          </Link>
         ))}
-      </ul>
+      </div>
     </section>
   );
 }

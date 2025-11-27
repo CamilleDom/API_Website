@@ -1,7 +1,12 @@
 import React from 'react';
 
-function Loader() {
-  return <div style={{ textAlign: 'center', padding: '2rem' }}>⏳ Chargement...</div>;
+function Loader({ message = 'Chargement...' }) {
+  return (
+    <div className="loader">
+      <div className="loader-spinner"></div>
+      <p>{message}</p>
+    </div>
+  );
 }
 
 export default Loader;
