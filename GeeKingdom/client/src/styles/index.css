@@ -1,0 +1,154 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700;800&display=swap');
+@import './variables.css';
+@import './components.css';
+@import './animations.css';
+
+/* ========================================
+   RESET & BASE STYLES
+======================================== */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--gradient-dark);
+  color: var(--gray-100);
+  line-height: 1.6;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Background avec effet particules */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    radial-gradient(circle at 20% 80%, rgba(168, 85, 247, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(236, 72, 153, 0.1) 0%, transparent 40%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+  transition: var(--transition-normal);
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+ul, ol {
+  list-style: none;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  outline: none;
+}
+
+input, textarea, select {
+  font-family: inherit;
+  outline: none;
+}
+
+/* ========================================
+   LAYOUT
+======================================== */
+#root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+main {
+  flex: 1;
+  padding: var(--spacing-xl);
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+section {
+  padding: var(--spacing-xl) 0;
+}
+
+/* ========================================
+   TYPOGRAPHY
+======================================== */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: var(--spacing-md);
+}
+
+h1 {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+h2 {
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  color: var(--white);
+}
+
+h3 {
+  font-size: clamp(1.25rem, 3vw, 1.75rem);
+  color: var(--purple-200);
+}
+
+p {
+  color: var(--gray-300);
+  margin-bottom: var(--spacing-md);
+}
+
+/* ========================================
+   SCROLLBAR CUSTOM
+======================================== */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--gray-900);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--gradient-secondary);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--purple-500);
+}
+
+/* ========================================
+   SELECTION
+======================================== */
+::selection {
+  background: var(--purple-600);
+  color: var(--white);
+}

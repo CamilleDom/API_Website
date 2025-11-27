@@ -20,13 +20,30 @@ Project/
 │   ├── mvnw.cmd
 │   └── pom.xml
 ├── GeeKingdom/
+│   ├── client/
+│   │   ├── node_modules/
+│   │   ├── public/ 
+│   │   ├── src/
+│   │   │   ├── components/
+│   │   │   ├── context/
+│   │   │   ├── pages/
+│   │   │   ├── styles/
+│   │   │   ├── App.css
+│   │   │   ├── App.jsx
+│   │   │   └── index.js
+│   │   ├── package-lock.json
+│   │   └── package.json
+│   ├── package.json
 │   ├── node_modules/
-│   ├── public/ 
-│   │   └── styles.css         
-│   ├── views/
-│   │   ├── api.ejs 
-│   │   └── index.ejs 
+│   ├── public/       
+│   ├── views/ 
 │   ├── package-lock.json
 │   ├── package.json
 │   └── server.js
+├── docker-compose.yml
+├── README.md
+├── restart-all.bat
+├── start-all.bat
+├── status.bat
+└── stop-all.bat
 ```

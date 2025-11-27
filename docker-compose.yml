@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: geekingdom_mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password_change_me
+      MYSQL_DATABASE: geekingdom_db
+      MYSQL_USER: geekingdom_user
+      MYSQL_PASSWORD: Api_Bdml_2025
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    networks:
+      - geekingdom_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Optionnel : phpMyAdmin pour gérer la base de données via interface web
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: geekingdom_phpmyadmin
+    restart: always
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      MYSQL_ROOT_PASSWORD: Api_Bdml_2025
+    ports:
+      - "8081:80"
+    depends_on:
+      - mysql
+    networks:
+      - geekingdom_network
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  geekingdom_network:
+    driver: bridge
