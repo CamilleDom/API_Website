@@ -4,17 +4,17 @@ title GeeKingdom - Demarrage complet
 color 0B
 
 echo.
-echo ╔══════════════════════════════════════════════════════════════╗
-echo ║                                                              ║
-echo ║     ██████╗ ███████╗███████╗██╗  ██╗██╗███╗   ██╗ ██████╗   ║
-echo ║    ██╔════╝ ██╔════╝██╔════╝██║ ██╔╝██║████╗  ██║██╔════╝   ║
-echo ║    ██║  ███╗█████╗  █████╗  █████╔╝ ██║██╔██╗ ██║██║  ███╗  ║
-echo ║    ██║   ██║██╔══╝  ██╔══╝  ██╔═██╗ ██║██║╚██╗██║██║   ██║  ║
-echo ║    ╚██████╔╝███████╗███████╗██║  ██╗██║██║ ╚████║╚██████╔╝  ║
-echo ║     ╚═════╝ ╚══════╝╚══════╝╚═╝  ╚═╝╚═╝╚═╝  ╚═══╝ ╚═════╝   ║
-echo ║                                                              ║
-echo ║                   Demarrage complet                          ║
-echo ╚══════════════════════════════════════════════════════════════╝
+echo ==============================================================
+echo
+echo      ██████╗ ███████╗███████╗██╗  ██╗██╗███╗   ██╗ ██████╗
+echo     ██╔════╝ ██╔════╝██╔════╝██║ ██╔╝██║████╗  ██║██╔════╝
+echo     ██║  ███╗█████╗  █████╗  █████╔╝ ██║██╔██╗ ██║██║  ███╗
+echo     ██║   ██║██╔══╝  ██╔══╝  ██╔═██╗ ██║██║╚██╗██║██║   ██║
+echo     ╚██████╔╝███████╗███████╗██║  ██╗██║██║ ╚████║╚██████╔╝
+echo      ╚═════╝ ╚══════╝╚══════╝╚═╝  ╚═╝╚═╝╚═╝  ╚═══╝ ╚═════╝
+echo
+echo                   Demarrage complet
+echo ==============================================================
 echo.
 
 :: ============================================
@@ -72,9 +72,9 @@ if %errorlevel% neq 0 (
 echo Java detecte
 
 echo.
-echo ========================================
+echo =============================================================
 echo    Tous les prerequis sont OK !
-echo ========================================
+echo =============================================================
 echo.
 
 :: ============================================
@@ -215,28 +215,28 @@ timeout /t 5 /nobreak >nul
 cls
 color 0A
 echo.
-echo ╔══════════════════════════════════════════════════════════════╗
-echo ║          GEEKINGDOM DEMARRE AVEC SUCCES !                   ║
-echo ╠══════════════════════════════════════════════════════════════╣
-echo ║   DOCKER                                                     ║
-echo ║      MySQL:       localhost:3306                            ║
-echo ║      phpMyAdmin:  http://localhost:8081                     ║
-echo ║   API SPRING BOOT                                           ║
-echo ║      URL:         http://localhost:8080                     ║
-echo ║   SERVEUR NODE.JS                                           ║
-echo ║      URL:         http://localhost:5000                     ║
-echo ║   CLIENT REACT                                              ║
-echo ║      URL:         http://localhost:3000                     ║
-echo ╠══════════════════════════════════════════════════════════════╣
-echo ║   ACCES phpMyAdmin:                                         ║
-echo ║      Serveur:  mysql                                         ║
-echo ║      User:     geekingdom_user                               ║
-echo ║      Password: Api_Bdml_2025                                 ║
-echo ╠══════════════════════════════════════════════════════════════╣
-echo ║   Pour arreter tous les services: stop-all.bat               ║
-echo ╚══════════════════════════════════════════════════════════════╝
-echo.
+echo ==============================================================
+echo        GEEKINGDOM DEMARRE AVEC SUCCES !
+echo ==============================================================
+echo DOCKER
+echo    MySQL:       localhost:3306
+echo    phpMyAdmin:  http://localhost:8081
+echo API SPRING BOOT
+echo    URL:         http://localhost:8080
+echo SERVEUR NODE.JS
+echo    URL:         http://localhost:5000
+echo CLIENT REACT
+echo    URL:         http://localhost:3000
+echo ==============================================================
+echo ACCES phpMyAdmin:
+echo    Serveur:  mysql
+echo    User:     geekingdom_user
+echo    Password: Api_Bdml_2025
+echo ==============================================================
+echo Pour arreter tous les services: stop-all.bat
+echo ==============================================================
 
+echo.
 echo Ouverture du navigateur dans 5 secondes...
 timeout /t 5 /nobreak >nul
 start http://localhost:3000
