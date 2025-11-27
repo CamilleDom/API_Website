@@ -1,76 +1,91 @@
 @echo off
-chcp 65001 >nul
 title GeeKingdom - Arret complet
 color 0C
 
 echo.
-echo =============================================================
-echo
-echo                  ARRET DE GEEKINGDOM
-echo
-echo =============================================================
+echo ========================================
+echo        ARRET DE GEEKINGDOM
+echo ========================================
 echo.
 
-:: ============================================
-:: ARRETER LES CONTAINERS DOCKER
-:: ============================================
+REM ============================================
+REM ETAPE 1: CONTAINERS DOCKER
+REM ============================================
 
-echo [1/4]   Arret des containers Docker...
-docker-compose down
-echo     Containers Docker arretes
+echo [1/4] Arret des containers Docker...
+docker-compose down >nul 2>&1
+if %errorlevel% equ 0 goto docker_ok
+echo    [INFO] Aucun container actif
+goto stop_node
+
+:docker_ok
+echo    [OK] Containers Docker arretes
 echo.
 
-:: ============================================
-:: ARRETER NODE.JS
-:: ============================================
+REM ============================================
+REM ETAPE 2: NODE.JS
+REM ============================================
 
-echo [2/4]  Arret du serveur Node.js...
+:stop_node
+echo [2/4] Arret de Node.js...
 taskkill /F /IM node.exe >nul 2>&1
-if %errorlevel% equ 0 (
-    echo     Node.js arrete
-) else (
-    echo         Node.js n'etait pas en cours d'execution
-)
+if %errorlevel% equ 0 goto node_ok
+echo    [INFO] Node.js n'etait pas en cours d'execution
+goto stop_java
+
+:node_ok
+echo    [OK] Node.js arrete
 echo.
 
-:: ============================================
-:: ARRETER JAVA (Spring Boot)
-:: ============================================
+REM ============================================
+REM ETAPE 3: JAVA / SPRING BOOT
+REM ============================================
 
-echo [3/4]   Arret de l'API Spring Boot...
+:stop_java
+echo [3/4] Arret de Java/Spring Boot...
 taskkill /F /IM java.exe >nul 2>&1
-if %errorlevel% equ 0 (
-    echo       Java/Spring Boot arrete
-) else (
-    echo      Java n'etait pas en cours d'execution
-)
+if %errorlevel% equ 0 goto java_ok
+echo    [INFO] Java n'etait pas en cours d'execution
+goto close_windows
+
+:java_ok
+echo    [OK] Java/Spring Boot arrete
 echo.
 
-:: ============================================
-:: FERMER LES FENETRES DE COMMANDE
-:: ============================================
+REM ============================================
+REM ETAPE 4: FERMER LES FENETRES
+REM ============================================
 
-echo [4/4]   Fermeture des fenetres...
+:close_windows
+echo [4/4] Fermeture des fenetres de commande...
 
-:: Fermer les fenêtres par leur titre
 taskkill /FI "WINDOWTITLE eq API Spring Boot*" /F >nul 2>&1
 taskkill /FI "WINDOWTITLE eq Node.js Server*" /F >nul 2>&1
 taskkill /FI "WINDOWTITLE eq React Client*" /F >nul 2>&1
 
-echo         Fenetres fermees
+echo    [OK] Fenetres fermees
 echo.
 
-:: ============================================
-:: RESUME
-:: ============================================
+REM ============================================
+REM RESUME
+REM ============================================
 
 color 0A
+echo ========================================
+echo    TOUS LES SERVICES SONT ARRETES
+echo ========================================
 echo.
-echo =============================================================
-echo
-echo              TOUS LES SERVICES SONT ARRETES
-echo
-echo =============================================================
+echo    Services arretes:
+echo    ----------------------------------------
+echo    - Docker MySQL
+echo    - Docker phpMyAdmin
+echo    - API Spring Boot
+echo    - Serveur Node.js
+echo    - Client React
+echo    ----------------------------------------
 echo.
-echo Appuyez sur une touche pour fermer...
-pause >nul
+echo    Pour redemarrer: start-all.bat
+echo.
+echo ========================================
+echo.
+pause

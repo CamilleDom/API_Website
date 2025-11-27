@@ -1,76 +1,49 @@
 @echo off
-chcp 65001 >nul
-title STATUT GEEKINGDOM
+title GeeKingdom - Statut
 color 0B
 
 echo.
-echo ===============================
+echo ========================================
 echo        STATUT DE GEEKINGDOM
-echo ===============================
+echo ========================================
 echo.
 
-:: ============================================
-:: DOCKER CONTAINERS
-:: ============================================
-echo DOCKER CONTAINERS:
-echo -------------------------------
-
-docker info >nul 2>&1
-if %errorlevel% neq 0 (
-    echo Docker n'est pas lance. Ouvre Docker Desktop.
-) else (
-    docker ps --format "   {{.Names}}: {{.Status}}" --filter "name=geekingdom"
-)
+echo [DOCKER CONTAINERS]
+echo ----------------------------------------
+docker ps --format "   {{.Names}}: {{.Status}}" --filter "name=geekingdom" 2>nul
 echo.
 
-:: ============================================
-:: PORTS
-:: ============================================
-echo PORTS EN ECOUTE:
-echo -------------------------------
+echo [PORTS EN ECOUTE]
+echo ----------------------------------------
 
-:: Port 3000 (React)
-netstat -an | findstr ":3000" | findstr "LISTENING" >nul 2>&1
-if %errorlevel% equ 0 (
-    echo    Port 3000 (React):     ACTIF
-) else (
-    echo    Port 3000 (React):     INACTIF
-)
+set "PORT3000=INACTIF"
+set "PORT3306=INACTIF"
+set "PORT5000=INACTIF"
+set "PORT8080=INACTIF"
+set "PORT8081=INACTIF"
 
-:: Port 3306 (MySQL)
-netstat -an | findstr ":3306" | findstr "LISTENING" >nul 2>&1
-if %errorlevel% equ 0 (
-    echo    Port 3306 (MySQL):     ACTIF
-) else (
-    echo    Port 3306 (MySQL):     INACTIF
-)
+netstat -an 2>nul | findstr ":3000" | findstr "LISTENING" >nul 2>&1
+if %errorlevel% equ 0 set "PORT3000=ACTIF"
 
-:: Port 5000 (Node.js)
-netstat -an | findstr ":5000" | findstr "LISTENING" >nul 2>&1
-if %errorlevel% equ 0 (
-    echo    Port 5000 (Node.js):   ACTIF
-) else (
-    echo    Port 5000 (Node.js):   INACTIF
-)
+netstat -an 2>nul | findstr ":3306" | findstr "LISTENING" >nul 2>&1
+if %errorlevel% equ 0 set "PORT3306=ACTIF"
 
-:: Port 8080 (API Java)
-netstat -an | findstr ":8080" | findstr "LISTENING" >nul 2>&1
-if %errorlevel% equ 0 (
-    echo    Port 8080 (API Java):  ACTIF
-) else (
-    echo    Port 8080 (API Java):  INACTIF
-)
+netstat -an 2>nul | findstr ":5000" | findstr "LISTENING" >nul 2>&1
+if %errorlevel% equ 0 set "PORT5000=ACTIF"
 
-:: Port 8081 (phpMyAdmin)
-netstat -an | findstr ":8081" | findstr "LISTENING" >nul 2>&1
-if %errorlevel% equ 0 (
-    echo    Port 8081 (phpMyAdmin): ACTIF
-) else (
-    echo    Port 8081 (phpMyAdmin): INACTIF
-)
+netstat -an 2>nul | findstr ":8080" | findstr "LISTENING" >nul 2>&1
+if %errorlevel% equ 0 set "PORT8080=ACTIF"
+
+netstat -an 2>nul | findstr ":8081" | findstr "LISTENING" >nul 2>&1
+if %errorlevel% equ 0 set "PORT8081=ACTIF"
+
+echo    Port 3000 [React]      : %PORT3000%
+echo    Port 3306 [MySQL]      : %PORT3306%
+echo    Port 5000 [Node.js]    : %PORT5000%
+echo    Port 8080 [API Java]   : %PORT8080%
+echo    Port 8081 [phpMyAdmin] : %PORT8081%
 
 echo.
-echo -------------------------------
+echo ========================================
 echo.
-echo Appuyez sur une touche pour fermer...
-pause >nul
+pause
