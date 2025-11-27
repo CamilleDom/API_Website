@@ -2,6 +2,50 @@
 title GeeKingdom - Demarrage complet
 color 0B
 
+REM ============================================
+REM CONFIGURER JAVA 17
+REM ============================================
+
+set "JAVA_HOME="
+set "JAVA_FOUND=0"
+
+REM Chercher Java 17
+for /d %%D in ("C:\Program Files\Eclipse Adoptium\jdk-17*") do (
+    set "JAVA_HOME=%%D"
+    set "JAVA_FOUND=1"
+)
+
+REM Si pas trouve, essayer Java 21
+if "%JAVA_FOUND%"=="0" (
+    for /d %%D in ("C:\Program Files\Eclipse Adoptium\jdk-21*") do (
+        set "JAVA_HOME=%%D"
+        set "JAVA_FOUND=1"
+    )
+)
+
+REM Verifier si Java 17+ a ete trouve
+if "%JAVA_FOUND%"=="0" (
+    color 0C
+    echo.
+    echo ========================================
+    echo    ERREUR: Java 17 non trouve
+    echo ========================================
+    echo.
+    echo    Vous avez:
+    dir "C:\Program Files\Eclipse Adoptium" /b 2>nul
+    echo.
+    echo    Spring Boot 3.x necessite Java 17
+    echo.
+    echo    Telechargez Java 17:
+    echo    https://adoptium.net/temurin/releases/?version=17
+    echo.
+    echo ========================================
+    pause
+    exit /b 1
+)
+
+set "PATH=%JAVA_HOME%\bin;%PATH%"
+
 echo.
 echo ========================================
 echo        DEMARRAGE DE GEEKINGDOM
@@ -29,7 +73,6 @@ pause
 exit /b 1
 
 :check_docker_running
-REM Verifier si Docker Desktop est lance
 docker info >nul 2>&1
 if %errorlevel% neq 0 goto start_docker
 echo    [OK] Docker Desktop operationnel
@@ -51,12 +94,10 @@ goto check_node
 :docker_failed
 color 0C
 echo    [ERREUR] Docker Desktop n'a pas pu demarrer
-echo    Veuillez le lancer manuellement et relancer ce script
 pause
 exit /b 1
 
 :check_node
-REM Verifier Node.js
 node --version >nul 2>&1
 if %errorlevel% neq 0 goto node_not_found
 echo    [OK] Node.js detecte
@@ -70,50 +111,8 @@ pause
 exit /b 1
 
 :check_java
-REM Verifier Java - essayer plusieurs methodes
-java -version >nul 2>&1
-if %errorlevel% equ 0 goto java_found
-
-java --version >nul 2>&1
-if %errorlevel% equ 0 goto java_found
-
-REM Verifier si JAVA_HOME est defini
-if defined JAVA_HOME goto java_home_found
-
-REM Verifier si mvnw peut fonctionner
-if exist "API_GeeKingdom\mvnw.cmd" goto java_skip_check
-
-goto java_not_found
-
-:java_found
-echo    [OK] Java detecte
-goto prereq_ok
-
-:java_home_found
-echo    [OK] Java detecte via JAVA_HOME
-echo        JAVA_HOME = %JAVA_HOME%
-goto prereq_ok
-
-:java_skip_check
-color 0E
-echo    [ATTENTION] Java non detecte dans PATH
-echo    Maven Wrapper sera utilise pour lancer l'API
-echo    Si l'API ne demarre pas, installez Java et ajoutez-le au PATH
-color 0B
-goto prereq_ok
-
-:java_not_found
-color 0E
-echo    [ATTENTION] Java non detecte
-echo.
-echo    Options:
-echo    1. Continuer quand meme - appuyez sur une touche
-echo    2. Quitter - fermez cette fenetre
-echo.
-echo    Pour installer Java: https://adoptium.net
-echo.
-pause
-color 0B
+echo    [OK] Java 17 detecte
+echo         JAVA_HOME = %JAVA_HOME%
 goto prereq_ok
 
 :prereq_ok
@@ -143,10 +142,6 @@ color 0C
 echo    [ERREUR] Impossible de demarrer Docker Compose
 pause
 exit /b 1
-
-REM ============================================
-REM ETAPE 2: ATTENDRE MYSQL
-REM ============================================
 
 :wait_mysql
 echo [ETAPE 2/5] Attente de MySQL...
@@ -188,23 +183,24 @@ echo.
 
 if not exist "API_GeeKingdom" goto api_not_found
 
-REM Utiliser mvnw.cmd sur Windows
-if exist "API_GeeKingdom\mvnw.cmd" goto use_mvnw_cmd
+REM Creer script temporaire pour l'API
+echo @echo off > "%~dp0temp_api.bat"
+echo set "JAVA_HOME=%JAVA_HOME%" >> "%~dp0temp_api.bat"
+echo set "PATH=%%JAVA_HOME%%\bin;%%PATH%%" >> "%~dp0temp_api.bat"
+echo cd /d "%~dp0API_GeeKingdom" >> "%~dp0temp_api.bat"
+echo echo. >> "%~dp0temp_api.bat"
+echo echo JAVA_HOME = %%JAVA_HOME%% >> "%~dp0temp_api.bat"
+echo echo. >> "%~dp0temp_api.bat"
+echo echo Demarrage de l API Spring Boot... >> "%~dp0temp_api.bat"
+echo call mvnw.cmd spring-boot:run >> "%~dp0temp_api.bat"
 
-REM Sinon utiliser mvnw
-start "API Spring Boot" cmd /k "cd API_GeeKingdom && echo Demarrage de l API Spring Boot... && mvnw spring-boot:run"
-goto api_started
+start "API Spring Boot" cmd /k "call "%~dp0temp_api.bat""
 
-:use_mvnw_cmd
-start "API Spring Boot" cmd /k "cd API_GeeKingdom && echo Demarrage de l API Spring Boot... && mvnw.cmd spring-boot:run"
-goto api_started
-
-:api_started
 echo    [OK] API en cours de demarrage
 echo        URL: http://localhost:8080
 echo.
-echo    Attente de 30 secondes
-timeout /t 30 /nobreak >nul
+echo    Attente de 45 secondes
+timeout /t 45 /nobreak >nul
 echo.
 goto start_node
 
@@ -213,10 +209,6 @@ color 0C
 echo    [ERREUR] Dossier API_GeeKingdom introuvable
 pause
 exit /b 1
-
-REM ============================================
-REM ETAPE 4: SERVEUR NODE.JS
-REM ============================================
 
 :start_node
 echo [ETAPE 4/5] Demarrage du serveur Node.js...
@@ -234,7 +226,7 @@ call npm install
 cd ..
 
 :launch_node
-start "Node.js Server" cmd /k "cd GeeKingdom && echo Demarrage du serveur Node.js... && node server.js"
+start "Node.js Server" cmd /k "cd /d "%~dp0GeeKingdom" && echo Demarrage du serveur Node.js... && node server.js"
 
 echo    [OK] Node.js en cours de demarrage
 echo        URL: http://localhost:5000
@@ -247,10 +239,6 @@ color 0C
 echo    [ERREUR] Fichier GeeKingdom/server.js introuvable
 pause
 exit /b 1
-
-REM ============================================
-REM ETAPE 5: CLIENT REACT
-REM ============================================
 
 :start_react
 echo [ETAPE 5/5] Demarrage du client React...
@@ -268,7 +256,7 @@ call npm install
 cd ..\..
 
 :launch_react
-start "React Client" cmd /k "cd GeeKingdom\client && echo Demarrage du client React... && npm start"
+start "React Client" cmd /k "cd /d "%~dp0GeeKingdom\client" && echo Demarrage du client React... && npm start"
 
 echo    [OK] React en cours de demarrage
 echo        URL: http://localhost:3000
@@ -281,11 +269,10 @@ echo    [ERREUR] Dossier GeeKingdom/client introuvable
 pause
 exit /b 1
 
-REM ============================================
-REM RESUME FINAL
-REM ============================================
-
 :show_summary
+REM Nettoyer fichier temporaire
+del "%~dp0temp_api.bat" >nul 2>&1
+
 timeout /t 5 /nobreak >nul
 cls
 color 0A
