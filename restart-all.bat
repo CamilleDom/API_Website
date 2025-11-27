@@ -1,12 +1,12 @@
 @echo off
 chcp 65001 >nul
-title 🔄 GeeKingdom - Redemarrage
+title  GeeKingdom - Redemarrage
 color 0E
 
 echo.
 echo ╔══════════════════════════════════════════════════════════════╗
 echo ║                                                              ║
-echo ║              🔄 REDEMARRAGE DE GEEKINGDOM                   ║
+echo ║                  REDEMARRAGE DE GEEKINGDOM                   ║
 echo ║                                                              ║
 echo ╚══════════════════════════════════════════════════════════════╝
 echo.

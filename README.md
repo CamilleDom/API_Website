@@ -40,6 +40,9 @@ Project/
 │   ├── package-lock.json
 │   ├── package.json
 │   └── server.js
+├──init-scripts/
+│   ├── 01-schema.sql
+│   └── 02-data.sql
 ├── docker-compose.yml
 ├── README.md
 ├── restart-all.bat
