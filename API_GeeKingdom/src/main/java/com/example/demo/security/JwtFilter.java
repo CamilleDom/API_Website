@@ -1,4 +1,4 @@
-package com.example.demo.security; 
+package com.example.demo.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -25,36 +25,43 @@ public class JwtFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException {
 
-        // 🔹 Ignore les endpoints d’authentification
+        // Ignorer les requêtes OPTIONS (preflight CORS)
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        // Ignorer les endpoints publics
         String path = request.getServletPath();
         if (path.startsWith("/auth")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        // 1️⃣ Récupère le header Authorization
+        // Récupérer le header Authorization
         final String authHeader = request.getHeader("Authorization");
 
+        // Si pas de token, continuer (la sécurité Spring gèrera l'accès)
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            // Aucun token → passe au filtre suivant
             filterChain.doFilter(request, response);
             return;
         }
 
-        // 2️⃣ Extrait le token JWT
+        // Extraire le token JWT
         final String token = authHeader.substring(7);
 
-        // 3️⃣ Vérifie la validité
+        // Vérifier la validité
         if (!JwtUtil.validateToken(token)) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write("Token invalide ou expiré.");
+            response.setContentType("application/json");
+            response.getWriter().write("{\"error\": \"Token invalide ou expire\"}");
             return;
         }
 
         try {
-            // 4️⃣ Parse le token avec la même clé que dans JwtUtil
+            // Parser le token
             Claims claims = Jwts.parserBuilder()
-                    .setSigningKey(JwtUtil.getSigningKey()) // ✅ clé proprement exposée
+                    .setSigningKey(JwtUtil.getSigningKey())
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
@@ -62,22 +69,22 @@ public class JwtFilter extends OncePerRequestFilter {
             String username = claims.getSubject();
             String role = (String) claims.get("role");
 
-            // 5️⃣ Crée les autorités Spring
+            // Créer les autorités Spring
             List<SimpleGrantedAuthority> authorities =
                     Collections.singletonList(new SimpleGrantedAuthority(role));
 
-            // 6️⃣ Ajoute l’utilisateur au contexte de sécurité
+            // Ajouter l'utilisateur au contexte de sécurité
             UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(username, null, authorities);
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
         } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write("Erreur lors du parsing du token : " + e.getMessage());
+            response.setContentType("application/json");
+            response.getWriter().write("{\"error\": \"Erreur lors du parsing du token\"}");
             return;
         }
 
-        // 7️⃣ Continue la chaîne
         filterChain.doFilter(request, response);
     }
 }
