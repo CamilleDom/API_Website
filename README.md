@@ -10,6 +10,38 @@
 > Plateforme e-commerce geek moderne avec API REST, React et MySQL
 
 ---
+## Requirements
+
+### Création d’un site web de commerce en ligne
+- [ ] Naviguer dans les catégories de produits.
+- [ ] Afficher les détails d’un produit (description, prix, photos).
+- [ ] Gérer un panier d’achats (ajouter, modifier ou supprimer des articles)
+- [ ] Finaliser une commande avec un système de paiement sécurisé
+### Développement d’API internes pour les fonctionnalités du site
+- [ ] **Gestion des produits** : récupérer, ajouter, mettre à jour ou supprimer un produit.
+- [ ] **Gestion des commandes** : créer, mettre à jour, annuler et suivre les commandes.
+- [ ] **Gestion des utilisateurs** : inscription, connexion, modification de profil, suppres-
+sion de compte et consultation de l’historique des commandes.
+- [ ] **Gestion des stocks** : vérifier et mettre à jour les niveaux de stock après chaque
+commande.
+- [ ] **Gestion des paiements** : traiter et suivre les transactions
+- [ ] **Gestion des avis clients** : consulter, ajouter ou supprimer les avis et notes des
+produits.
+- [ ] **Recommandation de produits** : proposer des produits basés sur l’historique
+d’achat et les préférences utilisateur grâce à un moteur d’IA
+- [ ] **Gestion des livraisons** : suivre et mettre à jour l’état des livraisons
+### Intégration d’une API externe
+- [ ] Localiser les magasins ou points de retrait proches de l’utilisateur
+- [ ] Proposer des recommandations personnalisées basées sur la position géogra-
+phique et les préférences
+### Création d’une documentation API
+- [ ] Fournir une documentation détaillée pour chaque API interne
+- [ ] Permettre à des développeurs tiers d’utiliser ces API pour créer des applications
+externes.
+- [ ] Utiliser des outils comme Swagger ou Postman pour générer et tester la documen-
+tation
+
+---
 
 ## Table des matieres
 
