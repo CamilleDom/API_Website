@@ -1,189 +1,310 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { pointsRetraitAPI } from '../services/api';
-import MapIframe from '../components/MapIframe';
 import Loader from '../components/Loader';
+import MapIframe from '../components/MapIframe';
+import '../styles/PointsRetraitPage.css';
 
 function PointsRetraitPage() {
-  const [points, setPoints] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedPoint, setSelectedPoint] = useState(null);
-  const [searchVille, setSearchVille] = useState('');
-  const [userLocation, setUserLocation] = useState(null);
+    const [points, setPoints] = useState([]);
+    const [selectedPoint, setSelectedPoint] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [searchVille, setSearchVille] = useState('');
+    const [userLocation, setUserLocation] = useState(null);
+    const mapRef = useRef(null);
 
-  useEffect(() => {
-    fetchPoints();
-    getUserLocation();
-  }, []);
+    useEffect(() => {
+        fetchPoints();
+        getUserLocation();
+    }, []);
 
-  const fetchPoints = async () => {
-    try {
-      const data = await pointsRetraitAPI.getActifs();
-      setPoints(data);
-    } catch (error) {
-      console.error('Erreur:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const getUserLocation = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setUserLocation({
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
-          });
-        },
-        (error) => {
-          console.log('Géolocalisation non disponible');
+    const getUserLocation = () => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    setUserLocation({
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude,
+                    });
+                },
+                (error) => {
+                    console.log('Géolocalisation non disponible:', error);
+                }
+            );
         }
-      );
-    }
-  };
+    };
 
-  const searchNearby = async () => {
-    if (!userLocation) {
-      alert('La géolocalisation n\'est pas disponible.');
-      return;
-    }
+    const fetchPoints = async () => {
+        setLoading(true);
+        try {
+            const data = await pointsRetraitAPI.getActifs();
+            setPoints(data);
+        } catch (error) {
+            console.error('Erreur lors du chargement des points:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-    setLoading(true);
-    try {
-      const data = await pointsRetraitAPI.getProximite(
-        userLocation.latitude,
-        userLocation.longitude,
-        10
-      );
-      setPoints(data.map(d => d.point || d));
-    } catch (error) {
-      console.error('Erreur:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    const searchNearby = async () => {
+        if (!userLocation) {
+            alert('Veuillez activer la géolocalisation');
+            return;
+        }
 
-  const searchByVille = async () => {
-    if (!searchVille.trim()) return;
+        setLoading(true);
+        try {
+            const data = await pointsRetraitAPI.getProximite(
+                userLocation.latitude,
+                userLocation.longitude,
+                10
+            );
+            setPoints(data.map(d => d.point || d));
+        } catch (error) {
+            console.error('Erreur:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-    setLoading(true);
-    try {
-      const data = await pointsRetraitAPI.getByVille(searchVille);
-      setPoints(data);
-    } catch (error) {
-      console.error('Erreur:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    const searchByVille = async () => {
+        if (!searchVille.trim()) return;
 
-  const parseHoraires = (horairesJson) => {
-    if (!horairesJson) return null;
-    try {
-      return JSON.parse(horairesJson);
-    } catch {
-      return null;
-    }
-  };
+        setLoading(true);
+        try {
+            const data = await pointsRetraitAPI.getByVille(searchVille);
+            setPoints(data);
+        } catch (error) {
+            console.error('Erreur:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-  if (loading) return <Loader message="Chargement des points de retrait..." />;
+    const handleCardClick = (point) => {
+        setSelectedPoint(point);
+        if (mapRef.current) {
+            mapRef.current.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+    };
 
-  return (
-    <section className="points-retrait-page">
-      <h2>📍 Points de Retrait</h2>
+    const parseHoraires = (horairesJson) => {
+        if (!horairesJson) return null;
+        try {
+            return typeof horairesJson === 'string'
+                ? JSON.parse(horairesJson)
+                : horairesJson;
+        } catch {
+            return null;
+        }
+    };
 
-      {/* Recherche */}
-      <div className="search-section">
-        <div className="search-by-location">
-          <button onClick={searchNearby} disabled={!userLocation}>
-            📍 Autour de moi
-          </button>
-        </div>
-        
-        <div className="search-by-ville">
-          <input
-            type="text"
-            placeholder="Rechercher par ville..."
-            value={searchVille}
-            onChange={(e) => setSearchVille(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && searchByVille()}
-          />
-          <button onClick={searchByVille}>Rechercher</button>
-        </div>
+    const formatHoraires = (horairesObj) => {
+        if (!horairesObj) return null;
 
-        <button onClick={fetchPoints} className="btn-reset">
-          Voir tous les points
-        </button>
-      </div>
+        const jours = {
+            lundi: 'Lun',
+            mardi: 'Mar',
+            mercredi: 'Mer',
+            jeudi: 'Jeu',
+            vendredi: 'Ven',
+            samedi: 'Sam',
+            dimanche: 'Dim'
+        };
 
-      <div className="points-content">
-        {/* Liste des points */}
-        <div className="points-list">
-          {points.length === 0 ? (
-            <p>Aucun point de retrait trouvé.</p>
-          ) : (
-            points.map(point => (
-              <div 
-                key={point.idPointRetrait} 
-                className={`point-card ${selectedPoint?.idPointRetrait === point.idPointRetrait ? 'selected' : ''}`}
-                onClick={() => setSelectedPoint(point)}
-              >
-                <h3>{point.nomPoint}</h3>
-                <p className="point-address">
-                  {point.adresse}<br />
-                  {point.codePostal} {point.ville}
-                </p>
-                
-                {point.telephone && (
-                  <p className="point-phone">📞 {point.telephone}</p>
-                )}
+        return Object.entries(jours).map(([key, label]) => ({
+            jour: label,
+            horaire: horairesObj[key] || 'Fermé'
+        }));
+    };
 
-                {point.distance && (
-                  <p className="point-distance">
-                    📍 À {point.distance.toFixed(1)} km
-                  </p>
-                )}
+    if (loading) return <Loader message="Chargement des points de retrait..." />;
 
-                <span className={`point-status status-${point.statut}`}>
-                  {point.statut === 'actif' ? '✓ Ouvert' : 
-                   point.statut === 'temporairement_ferme' ? '⚠ Temporairement fermé' : 
-                   '✗ Fermé'}
-                </span>
-              </div>
-            ))
-          )}
-        </div>
-
-        {/* Carte */}
-        <div className="points-map">
-          {selectedPoint ? (
-            <>
-              <MapIframe 
-                latitude={parseFloat(selectedPoint.latitude)} 
-                longitude={parseFloat(selectedPoint.longitude)}
-              />
-              <div className="selected-point-details">
-                <h3>{selectedPoint.nomPoint}</h3>
-                <p>{selectedPoint.adresse}</p>
-                <p>{selectedPoint.codePostal} {selectedPoint.ville}</p>
-                
-                {parseHoraires(selectedPoint.horairesJson) && (
-                  <div className="horaires">
-                    <h4>Horaires d'ouverture</h4>
-                    {/* Afficher les horaires */}
-                  </div>
-                )}
-              </div>
-            </>
-          ) : (
-            <div className="map-placeholder">
-              <p>Sélectionnez un point de retrait pour voir sa position sur la carte.</p>
+    return (
+        <section className="points-retrait-page">
+            <div className="points-header">
+                <h1>📍 Points de Retrait</h1>
+                <p className="points-subtitle">Récupérez vos commandes près de chez vous</p>
             </div>
-          )}
-        </div>
-      </div>
-    </section>
-  );
+
+            <div className="search-section">
+                <div className="search-controls">
+                    <button
+                        onClick={searchNearby}
+                        disabled={!userLocation}
+                        className="btn-location"
+                    >
+                        <span className="icon">📍</span>
+                        Autour de moi
+                    </button>
+
+                    <div className="search-input-group">
+                        <input
+                            type="text"
+                            placeholder="Rechercher par ville..."
+                            value={searchVille}
+                            onChange={(e) => setSearchVille(e.target.value)}
+                            onKeyPress={(e) => e.key === 'Enter' && searchByVille()}
+                            className="search-input"
+                        />
+                        <button onClick={searchByVille} className="btn-search">
+                            🔍 Rechercher
+                        </button>
+                    </div>
+
+                    <button onClick={fetchPoints} className="btn-reset">
+                        ↻ Tous les points
+                    </button>
+                </div>
+            </div>
+
+            <div className="points-content-grid">
+                <div className="points-cards-container">
+                    <div className="points-count">
+                        {points.length} point{points.length > 1 ? 's' : ''} disponible{points.length > 1 ? 's' : ''}
+                    </div>
+
+                    <div className="points-cards-grid">
+                        {points.length === 0 ? (
+                            <div className="no-points">
+                                <p>❌ Aucun point de retrait trouvé</p>
+                                <p className="no-points-hint">Essayez une autre recherche</p>
+                            </div>
+                        ) : (
+                            points.map(point => (
+                                <div
+                                    key={point.idPointRetrait}
+                                    className={`point-card ${selectedPoint?.idPointRetrait === point.idPointRetrait ? 'selected' : ''}`}
+                                    onClick={() => handleCardClick(point)}
+                                >
+                                    <div className="card-header">
+                                        <h3 className="point-name">{point.nomPoint}</h3>
+                                        <span className={`point-status status-${point.statut}`}>
+                      {point.statut === 'actif' ? '✓ Ouvert' :
+                          point.statut === 'temporairement_ferme' ? '⚠ Temporaire' :
+                              '✗ Fermé'}
+                    </span>
+                                    </div>
+
+                                    <div className="card-body">
+                                        <div className="point-info">
+                                            <div className="info-row">
+                                                <span className="info-icon">📍</span>
+                                                <div className="info-text">
+                                                    <p className="point-address">{point.adresse}</p>
+                                                    <p className="point-city">{point.codePostal} {point.ville}</p>
+                                                </div>
+                                            </div>
+
+                                            {point.telephone && (
+                                                <div className="info-row">
+                                                    <span className="info-icon">📞</span>
+                                                    <p className="point-phone">{point.telephone}</p>
+                                                </div>
+                                            )}
+
+                                            {point.distance && (
+                                                <div className="info-row">
+                                                    <span className="info-icon">🚗</span>
+                                                    <p className="point-distance">
+                                                        À {point.distance.toFixed(1)} km
+                                                    </p>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {parseHoraires(point.horairesJson) && (
+                                            <div className="point-horaires-preview">
+                                                <span className="horaires-icon">🕐</span>
+                                                <span className="horaires-text">Voir les horaires</span>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div className="card-footer">
+                                        <button className="btn-select">
+                                            Voir sur la carte →
+                                        </button>
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                </div>
+
+                <div className="points-map-section" ref={mapRef}>
+                    <div className="map-container">
+                        {selectedPoint ? (
+                            <>
+                                <div className="map-header">
+                                    <h3>📍 {selectedPoint.nomPoint}</h3>
+                                    <button
+                                        className="btn-close-map"
+                                        onClick={() => setSelectedPoint(null)}
+                                    >
+                                        ✕
+                                    </button>
+                                </div>
+
+                                <div className="map-wrapper">
+                                    <MapIframe
+                                        latitude={parseFloat(selectedPoint.latitude)}
+                                        longitude={parseFloat(selectedPoint.longitude)}
+                                    />
+                                </div>
+
+                                <div className="map-details">
+                                    <div className="detail-section">
+                                        <h4>📍 Adresse</h4>
+                                        <p>{selectedPoint.adresse}</p>
+                                        <p>{selectedPoint.codePostal} {selectedPoint.ville}, {selectedPoint.pays}</p>
+                                    </div>
+
+                                    {selectedPoint.telephone && (
+                                        <div className="detail-section">
+                                            <h4>📞 Contact</h4>
+                                            <p>{selectedPoint.telephone}</p>
+                                        </div>
+                                    )}
+
+                                    {parseHoraires(selectedPoint.horairesJson) && (
+                                        <div className="detail-section">
+                                            <h4>🕐 Horaires d'ouverture</h4>
+                                            <div className="horaires-grid">
+                                                {formatHoraires(parseHoraires(selectedPoint.horairesJson))?.map((item, idx) => (
+                                                    <div key={idx} className="horaire-row">
+                                                        <span className="horaire-jour">{item.jour}</span>
+                                                        <span className="horaire-time">{item.horaire}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {selectedPoint.capaciteMax && (
+                                        <div className="detail-section">
+                                            <h4>📦 Capacité</h4>
+                                            <p>{selectedPoint.capaciteMax} colis maximum</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </>
+                        ) : (
+                            <div className="map-placeholder">
+                                <div className="placeholder-content">
+                                    <span className="placeholder-icon">🗺️</span>
+                                    <h3>Sélectionnez un point de retrait</h3>
+                                    <p>Cliquez sur une carte pour voir sa position sur la carte</p>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+        </section>
+    );
 }
 
 export default PointsRetraitPage;

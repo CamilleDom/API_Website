@@ -184,17 +184,18 @@ echo.
 if not exist "API_GeeKingdom" goto api_not_found
 
 REM Creer script temporaire pour l'API
-echo @echo off > "%~dp0temp_api.bat"
-echo set "JAVA_HOME=%JAVA_HOME%" >> "%~dp0temp_api.bat"
-echo set "PATH=%%JAVA_HOME%%\bin;%%PATH%%" >> "%~dp0temp_api.bat"
-echo cd /d "%~dp0API_GeeKingdom" >> "%~dp0temp_api.bat"
-echo echo. >> "%~dp0temp_api.bat"
-echo echo JAVA_HOME = %%JAVA_HOME%% >> "%~dp0temp_api.bat"
-echo echo. >> "%~dp0temp_api.bat"
-echo echo Demarrage de l API Spring Boot... >> "%~dp0temp_api.bat"
-echo call mvnw.cmd spring-boot:run >> "%~dp0temp_api.bat"
+set "TEMP_API_SCRIPT=%TEMP%\geekingdom_api_%RANDOM%.bat"
+echo @echo off > "%TEMP_API_SCRIPT%"
+echo set "JAVA_HOME=%JAVA_HOME%" >> "%TEMP_API_SCRIPT%"
+echo set "PATH=%%JAVA_HOME%%\bin;%%PATH%%" >> "%TEMP_API_SCRIPT%"
+echo cd /d "%~dp0API_GeeKingdom" >> "%TEMP_API_SCRIPT%"
+echo echo. >> "%TEMP_API_SCRIPT%"
+echo echo JAVA_HOME = %%JAVA_HOME%% >> "%TEMP_API_SCRIPT%"
+echo echo. >> "%TEMP_API_SCRIPT%"
+echo echo Demarrage de l API Spring Boot... >> "%TEMP_API_SCRIPT%"
+echo call mvnw.cmd spring-boot:run >> "%TEMP_API_SCRIPT%"
 
-start "API Spring Boot" cmd /k "call "%~dp0temp_api.bat""
+start "API Spring Boot" cmd /k "call "%TEMP_API_SCRIPT%""
 
 echo    [OK] API en cours de demarrage
 echo        URL: http://localhost:8080
@@ -203,7 +204,6 @@ echo    Attente de 45 secondes
 timeout /t 45 /nobreak >nul
 echo.
 goto start_node
-
 :api_not_found
 color 0C
 echo    [ERREUR] Dossier API_GeeKingdom introuvable

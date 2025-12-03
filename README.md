@@ -13,9 +13,9 @@
 ## Requirements
 
 ### Création d’un site web de commerce en ligne
-- [ ] Naviguer dans les catégories de produits.
+- [x] Naviguer dans les catégories de produits.
 - [ ] Afficher les détails d’un produit (description, prix, photos).
-- [ ] Gérer un panier d’achats (ajouter, modifier ou supprimer des articles)
+- [x] Gérer un panier d’achats (ajouter, modifier ou supprimer des articles)
 - [ ] Finaliser une commande avec un système de paiement sécurisé
 ### Développement d’API internes pour les fonctionnalités du site
 - [ ] **Gestion des produits** : récupérer, ajouter, mettre à jour ou supprimer un produit.
