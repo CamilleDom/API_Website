@@ -26,8 +26,8 @@ public class ProduitController {
     @GetMapping("/{id}")
     public ResponseEntity<Produit> getById(@PathVariable Integer id) {
         return produitRepository.findById(id)
-            .map(ResponseEntity::ok)
-            .orElse(ResponseEntity.notFound().build());
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
@@ -38,11 +38,11 @@ public class ProduitController {
     @PutMapping("/{id}")
     public ResponseEntity<Produit> update(@PathVariable Integer id, @RequestBody Produit produit) {
         return produitRepository.findById(id)
-            .map(existing -> {
-                produit.setIdProduit(id);
-                return ResponseEntity.ok(produitRepository.save(produit));
-            })
-            .orElse(ResponseEntity.notFound().build());
+                .map(existing -> {
+                    produit.setIdProduit(id);
+                    return ResponseEntity.ok(produitRepository.save(produit));
+                })
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")

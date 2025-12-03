@@ -35,12 +35,18 @@ public class DetailCommande {
         this.idProduit = idProduit;
         this.quantite = quantite;
         this.prixUnitaire = prixUnitaire;
-        this.prixTotal = prixUnitaire.multiply(BigDecimal.valueOf(quantite));
+        // ✅ FIX: Calculer seulement si les valeurs ne sont pas nulles
+        if (prixUnitaire != null && quantite != null) {
+            this.prixTotal = prixUnitaire.multiply(BigDecimal.valueOf(quantite));
+        }
     }
 
-    // Méthode utilitaire
+    // ✅ IMPROVED: Méthode utilitaire avec vérification null
     public void calculerPrixTotal() {
-        this.prixTotal = this.prixUnitaire.multiply(BigDecimal.valueOf(this.quantite));
+        // ✅ FIX: Ne calculer que si prixUnitaire et quantite ne sont pas null
+        if (this.prixUnitaire != null && this.quantite != null) {
+            this.prixTotal = this.prixUnitaire.multiply(BigDecimal.valueOf(this.quantite));
+        }
     }
 
     // Getters et Setters
@@ -54,15 +60,20 @@ public class DetailCommande {
     public void setIdProduit(Integer idProduit) { this.idProduit = idProduit; }
 
     public Integer getQuantite() { return quantite; }
-    public void setQuantite(Integer quantite) { 
+    public void setQuantite(Integer quantite) {
         this.quantite = quantite;
-        calculerPrixTotal();
+        // ✅ FIX: Calculer seulement si possible
+        if (this.prixUnitaire != null && quantite != null) {
+            calculerPrixTotal();
+        }
     }
 
     public BigDecimal getPrixUnitaire() { return prixUnitaire; }
-    public void setPrixUnitaire(BigDecimal prixUnitaire) { 
+    public void setPrixUnitaire(BigDecimal prixUnitaire) {
         this.prixUnitaire = prixUnitaire;
-        calculerPrixTotal();
+        if (prixUnitaire != null && this.quantite != null) {
+            calculerPrixTotal();
+        }
     }
 
     public BigDecimal getPrixTotal() { return prixTotal; }
