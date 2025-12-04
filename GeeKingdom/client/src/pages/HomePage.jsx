@@ -3,11 +3,15 @@ import { Link } from 'react-router-dom';
 import { produitsAPI, categoriesAPI } from '../services/api';
 import ProductCard from '../components/ProductCard';
 import Loader from '../components/Loader';
+import RecommendationsSection from '../components/RecommendationsSection';
+import TrendingProducts from '../components/TrendingProducts';
 
 function HomePage() {
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const user = JSON.parse(localStorage.getItem('user') || 'null');
+  const userId = user?.id_utilisateur;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -38,6 +42,17 @@ function HomePage() {
       <section className="hero">
         <h1>Bienvenue sur GeeKingdom 👑</h1>
         <p>Découvrez nos meilleurs produits geek 🔥</p>
+          {/* Recommandations personnalisées */}
+          {user && user.id_utilisateur && (
+              <RecommendationsSection
+                  userId={user.id_utilisateur}
+                  limit={8}
+                  title="🎯 Recommandé pour vous"
+              />
+          )}
+
+          {/* Produits tendance */}
+          <TrendingProducts limit={12} />
         <div className="hero-buttons">
           <Link to="/products" className="btn-primary">
             Voir tous les produits

@@ -3,6 +3,7 @@ package com.example.demo.repositories;
 import com.example.demo.models.DetailCommande;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
@@ -14,6 +15,23 @@ public interface DetailCommandeRepository extends JpaRepository<DetailCommande, 
     List<DetailCommande> findByIdCommande(Integer idCommande);
     
     List<DetailCommande> findByIdProduit(Integer idProduit);
+
+    /* Obtenir les produits les plus vendus (pour les tendances)
+     * Retourne : [idProduit, quantitéTotale]*/
+
+    /**
+     * Obtenir les produits fréquemment achetés ensemble
+     * Trouve les produits souvent dans les mêmes commandes qu'un produit donné
+     * Retourne : [idProduit, fréquence]
+     */
+    @Query("SELECT d2.idProduit, COUNT(DISTINCT d2.idCommande) as frequency " +
+            "FROM DetailCommande d1 " +
+            "JOIN DetailCommande d2 ON d1.idCommande = d2.idCommande " +
+            "WHERE d1.idProduit = :idProduit " +
+            "AND d2.idProduit != :idProduit " +
+            "GROUP BY d2.idProduit " +
+            "ORDER BY frequency DESC")
+    List<Object[]> getProduitsAchetesEnsemble(@Param("idProduit") Integer idProduit);
     
     // Total d'une commande
     @Query("SELECT SUM(d.prixTotal) FROM DetailCommande d WHERE d.idCommande = :idCommande")
@@ -31,4 +49,5 @@ public interface DetailCommandeRepository extends JpaRepository<DetailCommande, 
         WHERE d.idProduit = :idProduit AND c.idUtilisateur = :idUtilisateur
     """)
     boolean hasUserBoughtProduct(Integer idProduit, Integer idUtilisateur);
+
 }

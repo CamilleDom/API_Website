@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import {BrowserRouter, Routes, Route, useParams} from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import Layout from './components/Layout';
@@ -20,6 +20,11 @@ import OrderConfirmationPage from './pages/OrderConfirmationPage';
 import PointsRetraitPage from './pages/PointsRetraitPage';
 import NotFoundPage from './pages/NotFoundPage';
 
+const ProductDetailWrapper = () => {
+    const { id } = useParams();
+    return <ProductDetailPage key={id} />;
+};
+
 function App() {
   return (
     <AuthProvider>
@@ -31,7 +36,7 @@ function App() {
               <Route index element={<HomePage />} />
               <Route path="categories" element={<CategoriesPage />} />
               <Route path="products" element={<ProductsPage />} />
-              <Route path="product/:id" element={<ProductDetailPage />} />
+                <Route path="/product/:id" element={<ProductDetailWrapper />} />
               <Route path="cart" element={<CartPage />} />
               <Route path="points-retrait" element={<PointsRetraitPage />} />
               <Route path="login" element={<LoginPage />} />

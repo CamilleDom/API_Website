@@ -56,6 +56,10 @@ public class Produit {
     @Column(name = "tags_json", columnDefinition = "JSON")
     private String tagsJson;
 
+    public String getImageUrl() {
+        return "";
+    }
+
     // Enum
     public enum Statut {
         disponible, rupture, archive

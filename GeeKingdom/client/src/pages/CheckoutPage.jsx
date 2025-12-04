@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
-import { commandesAPI, detailsCommandeAPI, paiementsAPI } from '../services/api';
+import { commandesAPI, detailsCommandeAPI, paiementsAPI, stocksAPI } from '../services/api';
 import Loader from '../components/Loader';
 
 function CheckoutPage() {
@@ -12,6 +12,7 @@ function CheckoutPage() {
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [stockErrors, setStockErrors] = useState([]); // Track stock errors per product
     const [step, setStep] = useState(1);
 
     const [livraison, setLivraison] = useState({
@@ -29,6 +30,29 @@ function CheckoutPage() {
         setLivraison({ ...livraison, [e.target.name]: e.target.value });
     };
 
+    // Vérifier la disponibilité du stock avant de passer commande
+    const verifierStock = async () => {
+        const errors = [];
+
+        for (const item of cart) {
+            try {
+                const stock = await stocksAPI.getByProduit(item.idProduit || item.id);
+                if (stock.quantiteDisponible < item.quantity) {
+                    errors.push({
+                        productId: item.idProduit || item.id,
+                        productName: item.name,
+                        requested: item.quantity,
+                        available: stock.quantiteDisponible
+                    });
+                }
+            } catch (err) {
+                console.error(`Erreur vérification stock pour ${item.name}:`, err);
+            }
+        }
+
+        return errors;
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -39,8 +63,19 @@ function CheckoutPage() {
 
         setLoading(true);
         setError('');
+        setStockErrors([]);
 
         try {
+            // ✅ Étape 0: Vérifier le stock disponible avant de créer la commande
+            const stockIssues = await verifierStock();
+            if (stockIssues.length > 0) {
+                setStockErrors(stockIssues);
+                setError('Certains produits ne sont plus disponibles en quantité suffisante.');
+                setLoading(false);
+                return;
+            }
+
+            // ✅ Étape 1: Créer la commande
             const commande = await commandesAPI.create({
                 idUtilisateur: user.id,
                 montantTotal: getTotal(),
@@ -50,25 +85,49 @@ function CheckoutPage() {
                 paysLivraison: livraison.pays,
             });
 
+            // ✅ Étape 2: Créer les détails de commande (le stock sera réservé automatiquement côté backend)
+            const detailsCreated = [];
             for (const item of cart) {
-                await detailsCommandeAPI.create({
-                    idCommande: commande.idCommande,
-                    idProduit: item.idProduit || item.id,
-                    quantite: item.quantity,
-                    prixUnitaire: item.price,
-                    prixTotal: item.price * item.quantity,
-                });
+                try {
+                    const detail = await detailsCommandeAPI.create({
+                        idCommande: commande.idCommande,
+                        idProduit: item.idProduit || item.id,
+                        quantite: item.quantity,
+                        prixUnitaire: item.price,
+                        prixTotal: item.price * item.quantity,
+                    });
+                    detailsCreated.push(detail);
+                } catch (detailErr) {
+                    // ✅ Gestion des erreurs de stock insuffisant
+                    const errorData = detailErr.response?.data || detailErr;
+
+                    if (errorData.error === 'Stock insuffisant') {
+                        setStockErrors(prev => [...prev, {
+                            productId: item.idProduit || item.id,
+                            productName: item.name,
+                            requested: item.quantity,
+                            available: errorData.stockDisponible || 0
+                        }]);
+                        throw new Error(`Stock insuffisant pour "${item.name}". Disponible: ${errorData.stockDisponible || 0}, Demandé: ${item.quantity}`);
+                    }
+                    throw detailErr;
+                }
             }
 
+            // ✅ Étape 3: Créer le paiement
             const paiementResult = await paiementsAPI.create({
                 idCommande: commande.idCommande,
                 montant: getTotal(),
                 methodePaiement: paiement.methode,
             });
 
+            // ✅ Étape 4: Traiter le paiement
             await paiementsAPI.traiter(paiementResult.idPaiement);
+
+            // ✅ Étape 5: Vider le panier
             await clearCart();
 
+            // ✅ Étape 6: Rediriger vers la confirmation
             navigate('/order-confirmation', {
                 state: {
                     orderId: commande.idCommande,
@@ -77,7 +136,18 @@ function CheckoutPage() {
             });
 
         } catch (err) {
-            setError(err.message || 'Une erreur est survenue lors de la commande.');
+            console.error('Erreur commande:', err);
+
+            // Parse error message if it's a JSON string
+            let errorMessage = err.message || 'Une erreur est survenue lors de la commande.';
+
+            if (typeof errorMessage === 'string' && errorMessage.includes('Stock insuffisant')) {
+                // Error already formatted
+            } else if (err.error) {
+                errorMessage = err.error;
+            }
+
+            setError(errorMessage);
         } finally {
             setLoading(false);
         }
@@ -141,7 +211,40 @@ function CheckoutPage() {
                 </div>
             </div>
 
-            {error && <div className="error-message">{error}</div>}
+            {/* Error Messages */}
+            {error && (
+                <div className="error-message">
+                    <span className="error-icon">⚠️</span>
+                    {error}
+                </div>
+            )}
+
+            {/* Stock Errors Detail */}
+            {stockErrors.length > 0 && (
+                <div className="stock-errors-container">
+                    <h4>❌ Problèmes de stock détectés :</h4>
+                    <ul className="stock-errors-list">
+                        {stockErrors.map((stockErr, index) => (
+                            <li key={index} className="stock-error-item">
+                                <strong>{stockErr.productName}</strong>
+                                <span>
+                                    Demandé: {stockErr.requested} |
+                                    Disponible: {stockErr.available}
+                                </span>
+                            </li>
+                        ))}
+                    </ul>
+                    <p className="stock-error-help">
+                        Veuillez <button
+                        type="button"
+                        className="btn-link"
+                        onClick={() => navigate('/cart')}
+                    >
+                        modifier votre panier
+                    </button> pour ajuster les quantités.
+                    </p>
+                </div>
+            )}
 
             <form onSubmit={handleSubmit}>
                 {/* Step 1: Livraison */}
@@ -290,14 +393,22 @@ function CheckoutPage() {
                                 </tr>
                                 </thead>
                                 <tbody>
-                                {cart.map(item => (
-                                    <tr key={item.id}>
-                                        <td>{item.name}</td>
-                                        <td>{item.price.toFixed(2)} €</td>
-                                        <td>×{item.quantity}</td>
-                                        <td>{(item.price * item.quantity).toFixed(2)} €</td>
-                                    </tr>
-                                ))}
+                                {cart.map(item => {
+                                    const hasStockError = stockErrors.some(
+                                        err => err.productId === (item.idProduit || item.id)
+                                    );
+                                    return (
+                                        <tr key={item.id} className={hasStockError ? 'stock-error-row' : ''}>
+                                            <td>
+                                                {item.name}
+                                                {hasStockError && <span className="stock-warning"> ⚠️</span>}
+                                            </td>
+                                            <td>{item.price.toFixed(2)} €</td>
+                                            <td>×{item.quantity}</td>
+                                            <td>{(item.price * item.quantity).toFixed(2)} €</td>
+                                        </tr>
+                                    );
+                                })}
                                 </tbody>
                                 <tfoot>
                                 <tr className="total-row">
@@ -325,11 +436,19 @@ function CheckoutPage() {
                             <button type="button" className="btn-secondary" onClick={() => setStep(1)}>
                                 ← Retour
                             </button>
-                            <button type="submit" className="btn-primary" disabled={loading}>
+                            <button
+                                type="submit"
+                                className="btn-primary"
+                                disabled={loading || stockErrors.length > 0}
+                            >
                                 {loading ? (
                                     <>
                                         <span className="spinner"></span>
                                         Traitement en cours...
+                                    </>
+                                ) : stockErrors.length > 0 ? (
+                                    <>
+                                        Stock insuffisant
                                     </>
                                 ) : (
                                     <>

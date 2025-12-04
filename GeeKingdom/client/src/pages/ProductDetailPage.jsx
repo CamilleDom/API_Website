@@ -5,6 +5,7 @@ import { useCart } from '../context/CartContext';
 import ReviewCard from '../components/ReviewCard';
 import ReviewForm from '../components/ReviewForm';
 import Loader from '../components/Loader';
+import SimilarProducts from '../components/SimilarProducts';
 
 function ProductDetailPage() {
   const { id } = useParams();
@@ -143,6 +144,7 @@ function ProductDetailPage() {
                   <button onClick={handleAddToCart} className="btn-add-cart">
                     Ajouter au panier
                   </button>
+
                 </div>
               </>
             ) : (
@@ -167,6 +169,8 @@ function ProductDetailPage() {
         ) : (
           <p>Aucun avis pour ce produit.</p>
         )}
+
+          <SimilarProducts productId={parseInt(id)} limit={6} />
       </div>
     </section>
   );

@@ -156,26 +156,78 @@ export const panierAPI = {
 // COMMANDES
 // ============================================
 export const commandesAPI = {
-  getAll: () => 
-    apiRequest('/api/commandes'),
+    // Récupérer toutes les commandes
+    getAll: () =>
+        apiRequest('/api/commandes'),
 
-  getById: (id) => 
-    apiRequest(`/api/commandes/${id}`),
+    // Récupérer une commande par ID
+    getById: (id) =>
+        apiRequest(`/api/commandes/${id}`),
 
-  getByUtilisateur: (idUtilisateur) => 
-    apiRequest(`/api/commandes/utilisateur/${idUtilisateur}`),
+    // Récupérer les commandes d'un utilisateur
+    getByUtilisateur: (idUtilisateur) =>
+        apiRequest(`/api/commandes/utilisateur/${idUtilisateur}`),
 
-  create: (data) =>
-    apiRequest('/api/commandes', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    }),
+    // Récupérer les commandes par statut
+    getByStatut: (statut) =>
+        apiRequest(`/api/commandes/statut/${statut}`),
 
-  update: (id, data) =>
-    apiRequest(`/api/commandes/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    }),
+    // Rechercher par numéro de commande
+    getByNumero: (numeroCommande) =>
+        apiRequest(`/api/commandes/numero/${numeroCommande}`),
+
+    // Créer une nouvelle commande
+    create: (data) =>
+        apiRequest('/api/commandes', {
+            method: 'POST',
+            body: JSON.stringify(data),
+        }),
+
+    // Mettre à jour une commande (adresse, etc.)
+    update: (id, data) =>
+        apiRequest(`/api/commandes/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(data),
+        }),
+
+    // Changer le statut d'une commande
+    updateStatut: (id, statut) =>
+        apiRequest(`/api/commandes/${id}/statut`, {
+            method: 'PUT',
+            body: JSON.stringify({ statut }),
+        }),
+
+    // Annuler une commande
+    annuler: (id, motif = null) =>
+        apiRequest(`/api/commandes/${id}/annuler`, {
+            method: 'POST',
+            body: JSON.stringify({ motif }),
+        }),
+
+    // Suivre une commande (tracking)
+    suivre: (id) =>
+        apiRequest(`/api/commandes/${id}/suivi`),
+
+    // Historique des commandes avec filtres
+    getHistorique: (idUtilisateur, filters = {}) => {
+        const params = new URLSearchParams();
+        if (filters.statut) params.append('statut', filters.statut);
+        if (filters.dateDebut) params.append('dateDebut', filters.dateDebut);
+        if (filters.dateFin) params.append('dateFin', filters.dateFin);
+
+        const queryString = params.toString();
+        return apiRequest(`/api/commandes/utilisateur/${idUtilisateur}/historique${queryString ? '?' + queryString : ''}`);
+    },
+
+    // Statistiques des commandes d'un utilisateur
+    getStats: (idUtilisateur) =>
+        apiRequest(`/api/commandes/utilisateur/${idUtilisateur}/stats`),
+
+    // Supprimer une commande (admin)
+    delete: (id) =>
+        apiRequest(`/api/commandes/${id}`, {
+            method: 'DELETE',
+        }),
 };
 
 // ============================================
