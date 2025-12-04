@@ -1,0 +1,216 @@
+/* ========================================
+   SIMILAR PRODUCTS SECTION
+======================================== */
+.similar-products-section {
+    margin: var(--spacing-3xl) 0;
+    padding: var(--spacing-2xl);
+    background: var(--gradient-card);
+    backdrop-filter: blur(20px);
+    border-radius: var(--radius-xl);
+    border: 1px solid rgba(168, 85, 247, 0.15);
+    position: relative;
+    overflow: hidden;
+}
+
+.similar-products-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--gradient-secondary);
+}
+
+/* Header */
+.similar-products-section h3 {
+    font-size: 1.75rem;
+    color: var(--white);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-xl);
+}
+
+.similar-products-section .icon {
+    font-size: 2rem;
+    animation: flame 2s ease-in-out infinite;
+}
+
+@keyframes flame {
+    0%, 100% { transform: scale(1) rotate(-5deg); }
+    50% { transform: scale(1.1) rotate(5deg); }
+}
+
+/* Carousel Container */
+.similar-products-carousel {
+    display: flex;
+    gap: var(--spacing-lg);
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    padding: var(--spacing-sm) 0 var(--spacing-lg) 0;
+    scrollbar-width: thin;
+    scrollbar-color: var(--purple-500) rgba(255, 255, 255, 0.1);
+    margin: 0 calc(-1 * var(--spacing-md));
+    padding-left: var(--spacing-md);
+    padding-right: var(--spacing-md);
+}
+
+.similar-products-carousel::-webkit-scrollbar {
+    height: 6px;
+}
+
+.similar-products-carousel::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-full);
+}
+
+.similar-products-carousel::-webkit-scrollbar-thumb {
+    background: var(--gradient-secondary);
+    border-radius: var(--radius-full);
+}
+
+.similar-products-carousel::-webkit-scrollbar-thumb:hover {
+    background: var(--purple-500);
+}
+
+/* Product Cards in Carousel */
+.similar-products-carousel > * {
+    flex: 0 0 280px;
+    transition: var(--transition-normal);
+}
+
+.similar-products-carousel > *:hover {
+    transform: scale(1.05);
+}
+
+/* Scroll Hint */
+.scroll-hint {
+    text-align: center;
+    margin-top: var(--spacing-lg);
+    padding-top: var(--spacing-lg);
+    border-top: 1px solid rgba(168, 85, 247, 0.1);
+}
+
+.scroll-hint span {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    color: var(--purple-400);
+    font-size: 0.9rem;
+    font-weight: 500;
+    animation: slideHorizontal 3s ease-in-out infinite;
+}
+
+@keyframes slideHorizontal {
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(10px); }
+}
+
+/* Loading State */
+.loading-carousel {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 300px;
+}
+
+.loading-carousel .spinner {
+    width: 50px;
+    height: 50px;
+    border: 3px solid rgba(168, 85, 247, 0.2);
+    border-top-color: var(--purple-500);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Special gradient effect on hover */
+.similar-products-section:hover::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at center, rgba(168, 85, 247, 0.05) 0%, transparent 70%);
+    pointer-events: none;
+    animation: pulse 2s ease-in-out;
+}
+
+@keyframes pulse {
+    0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+    50% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(1.2); }
+}
+
+/* ========================================
+   RESPONSIVE DESIGN
+======================================== */
+@media (max-width: 768px) {
+    .similar-products-section {
+        padding: var(--spacing-lg);
+        margin: var(--spacing-2xl) calc(-1 * var(--spacing-md));
+        border-radius: 0;
+    }
+    
+    .similar-products-section h3 {
+        font-size: 1.5rem;
+        flex-wrap: wrap;
+    }
+    
+    .similar-products-carousel {
+        gap: var(--spacing-md);
+    }
+    
+    .similar-products-carousel > * {
+        flex: 0 0 240px;
+    }
+    
+    .scroll-hint {
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .similar-products-section {
+        padding: var(--spacing-md);
+    }
+    
+    .similar-products-section h3 {
+        font-size: 1.25rem;
+    }
+    
+    .similar-products-section .icon {
+        font-size: 1.5rem;
+    }
+    
+    .similar-products-carousel > * {
+        flex: 0 0 200px;
+    }
+    
+    .loading-carousel {
+        min-height: 200px;
+    }
+    
+    .loading-carousel .spinner {
+        width: 40px;
+        height: 40px;
+    }
+}
+
+/* Touch devices */
+@media (hover: none) and (pointer: coarse) {
+    .similar-products-carousel {
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .similar-products-carousel > * {
+        scroll-snap-align: start;
+    }
+}

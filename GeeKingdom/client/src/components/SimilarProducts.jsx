@@ -2,9 +2,9 @@
 // Localisation : GeeKingdom/client/src/components/SimilarProducts.jsx
 
 import React, { useState, useEffect } from 'react';
-import RecommendationCard from '../components/Recommendationcard';
-import recommendationService from '../services/Recommendationservice';
-import '../styles/Similarproducts.css';
+import RecommendationCard from '../components/RecommendationCard';
+import recommendationService from '../services/RecommendationService';
+import '../styles/SimilarProducts.css';
 /**
  * Carrousel de produits similaires
  * VERSION CORRIGÉE : useEffect se déclenche à chaque changement de productId

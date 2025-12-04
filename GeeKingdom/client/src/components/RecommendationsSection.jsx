@@ -1,83 +1,70 @@
-// Section complète de recommandations personnalisées
-// Localisation : GeeKingdom/client/src/components/RecommendationsSection.jsx
+// Grille de produits tendance
+// Localisation : GeeKingdom/client/src/components/TrendingProducts.jsx
 
 import React, { useState, useEffect } from 'react';
-import RecommendationCard from '../components/Recommendationcard';
-import recommendationService from '../services/Recommendationservice';
-import '../styles/Recommendationssection.css';
+import RecommendationCard from '../components/RecommendationCard';
+import recommendationService from '../services/RecommendationService';
+import '../styles/TrendingProducts.css';
 
 /**
- * Section de recommandations avec gestion d'état
- * VERSION CORRIGÉE : useEffect se déclenche à chaque changement d'userId
- * Usage: <RecommendationsSection userId={5} limit={8} title="Recommandé pour vous" />
+ * Grille de produits tendance avec badges top 3
+ * VERSION CORRIGÉE : useEffect se déclenche à chaque changement de limit
+ * Usage: <TrendingProducts limit={12} />
  */
-const RecommendationsSection = ({
-                                    userId,
-                                    limit = 8,
-                                    title = "🎯 Recommandé pour vous",
-                                    showScore = true
-                                }) => {
-    const [recommendations, setRecommendations] = useState([]);
+const TrendingProducts = ({ limit = 12 }) => {
+    const [trendingProducts, setTrendingProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     useEffect(() => {
         // 🔍 Log pour debug
-        console.log('🔄 RecommendationsSection useEffect déclenché', { userId, limit });
+        console.log('🔄 TrendingProducts useEffect déclenché', { limit });
 
-        const fetchRecommendations = async () => {
-            if (!userId) {
-                console.log('⚠️ Pas d\'userId, arrêt');
-                setLoading(false);
-                return;
-            }
-
+        const fetchTrendingProducts = async () => {
             try {
-                console.log('📡 Chargement recommandations pour utilisateur', userId);
+                console.log('📡 Chargement produits tendance');
                 setLoading(true);
                 setError(null);
 
-                const data = await recommendationService.getPersonalizedRecommendations(userId, limit);
-                console.log('✅ Recommandations reçues:', data.recommendations?.length || 0, 'produits');
+                const data = await recommendationService.getTrendingProducts(limit);
+                console.log('✅ Tendances reçues:', data.trending?.length || 0, 'produits');
 
-                setRecommendations(data.recommendations || []);
+                setTrendingProducts(data.trending || []);
             } catch (err) {
-                console.error('❌ Erreur recommandations:', err);
-                setError('Impossible de charger les recommandations');
+                console.error('❌ Erreur produits tendance:', err);
+                setError('Impossible de charger les produits tendance');
             } finally {
-                console.log('🏁 Chargement recommandations terminé');
+                console.log('🏁 Chargement tendances terminé');
                 setLoading(false);
             }
         };
 
-        fetchRecommendations();
+        fetchTrendingProducts();
 
         // 🧹 Cleanup : réinitialiser l'état au démontage
         return () => {
-            setRecommendations([]);
+            setTrendingProducts([]);
             setLoading(true);
             setError(null);
         };
-    }, [userId, limit]); // ✅ IMPORTANT : Dépendances complètes
+    }, [limit]); // ✅ IMPORTANT : Dépendance sur limit
 
-    // État de chargement
     if (loading) {
         return (
-            <div className="recommendations-section">
-                <h2>{title}</h2>
+            <div className="trending-section">
+                <h2>🔥 Tendances du moment</h2>
                 <div className="loading-state">
                     <div className="spinner"></div>
-                    <p>Chargement de vos recommandations personnalisées...</p>
+                    <p>Chargement des produits les plus populaires...</p>
                 </div>
             </div>
         );
     }
 
-    // État d'erreur
     if (error) {
         return (
-            <div className="recommendations-section">
-                <h2>{title}</h2>
+            <div className="trending-section">
+                <h2>🔥 Tendances du moment</h2>
                 <div className="error-state">
                     <span className="error-icon">⚠️</span>
                     <p>{error}</p>
@@ -86,8 +73,9 @@ const RecommendationsSection = ({
                         style={{
                             marginTop: '16px',
                             padding: '10px 20px',
-                            background: '#fff',
-                            border: '2px solid #fff',
+                            background: '#667eea',
+                            color: 'white',
+                            border: 'none',
                             borderRadius: '8px',
                             cursor: 'pointer',
                             fontWeight: 'bold'
@@ -100,34 +88,40 @@ const RecommendationsSection = ({
         );
     }
 
-    // Aucune recommandation
-    if (recommendations.length === 0) {
-        return (
-            <div className="recommendations-section">
-                <h2>{title}</h2>
-                <div className="empty-state">
-                    <span className="empty-icon">🔍</span>
-                    <p>Commencez à acheter pour recevoir des recommandations personnalisées !</p>
-                </div>
-            </div>
-        );
+    if (trendingProducts.length === 0) {
+        return null;
     }
 
-    // Affichage des recommandations
     return (
-        <div className="recommendations-section">
-            <h2>{title}</h2>
-            <div className="recommendations-grid">
-                {recommendations.map((product) => (
-                    <RecommendationCard
-                        key={product.idProduit}
-                        product={product}
-                        showScore={showScore}
-                    />
+        <div className="trending-section">
+            <div className="trending-header">
+                <h2>
+                    <span className="fire-icon">🔥</span>
+                    Tendances du moment
+                </h2>
+                <p className="trending-subtitle">
+                    Les produits les plus populaires chez nos clients
+                </p>
+            </div>
+
+            <div className="trending-grid">
+                {trendingProducts.map((product, index) => (
+                    <div key={product.idProduit} className="trending-item">
+                        {/* Badges top 3 */}
+                        {index < 3 && (
+                            <div className={`position-badge badge-${index + 1}`}>
+                                #{index + 1}
+                            </div>
+                        )}
+                        <RecommendationCard
+                            product={product}
+                            showScore={false}
+                        />
+                    </div>
                 ))}
             </div>
         </div>
     );
 };
 
-export default RecommendationsSection;
+export default TrendingProducts;

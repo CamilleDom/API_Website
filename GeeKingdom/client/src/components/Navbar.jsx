@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 
 function Navbar() {
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, hasRole, logout } = useAuth();  // ✅ Ajout de hasRole
   const { getItemCount } = useCart();
   const navigate = useNavigate();
 
@@ -34,6 +34,14 @@ function Navbar() {
         {isAuthenticated() ? (
           <>
             <Link to="/orders">Mes Commandes</Link>
+            
+            {/* ✅ BOUTON ADMIN - Affiché seulement si l'utilisateur est admin */}
+            {hasRole('admin') && (
+              <Link to="/admin" className="admin-link">
+                👑 Admin
+              </Link>
+            )}
+            
             <Link to="/profile">
               👤 {user?.prenom || user?.nom || 'Profil'}
             </Link>

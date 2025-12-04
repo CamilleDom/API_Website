@@ -2,9 +2,9 @@
 // Localisation : GeeKingdom/client/src/components/TrendingProducts.jsx
 
 import React, { useState, useEffect } from 'react';
-import RecommendationCard from '../components/Recommendationcard';
-import recommendationService from '../services/Recommendationservice';
-import '../styles/Trendingproducts.css';
+import RecommendationCard from '../components/RecommendationCard';
+import recommendationService from '../services/RecommendationService';
+import '../styles/TrendingProducts.css';
 
 /**
  * Grille de produits tendance avec badges top 3
