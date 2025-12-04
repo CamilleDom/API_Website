@@ -4,6 +4,7 @@ import com.example.demo.models.AvisProduit;
 import com.example.demo.repositories.AvisProduitRepository;
 import com.example.demo.repositories.ProduitRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -45,6 +46,31 @@ public class AvisProduitController {
     @GetMapping("/moderation")
     public List<AvisProduit> getEnAttente() {
         return avisRepository.findByStatutModeration(AvisProduit.StatutModeration.en_attente);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> update(@PathVariable Integer id, @RequestBody AvisProduit avisModifie) {
+        return avisRepository.findById(id)
+                .map(avis -> {
+                    // Vérifier que c'est bien le propriétaire qui modifie
+                    if (!avis.getIdUtilisateur().equals(avisModifie.getIdUtilisateur())) {
+                        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                                .body(Map.of("error", "Vous ne pouvez modifier que vos propres avis"));
+                    }
+
+                    // Mettre à jour les champs modifiables
+                    avis.setNote(avisModifie.getNote());
+                    avis.setCommentaire(avisModifie.getCommentaire());
+                    avis.setStatutModeration(AvisProduit.StatutModeration.approuve); // Repasse en modération
+
+                    AvisProduit saved = avisRepository.save(avis);
+
+                    // Mettre à jour la note moyenne du produit
+                    updateProduitNote(avis.getIdProduit());
+
+                    return ResponseEntity.ok(saved);
+                })
+                .orElse(ResponseEntity.notFound().build());
     }
 
     // ✅ CRÉER UN AVIS

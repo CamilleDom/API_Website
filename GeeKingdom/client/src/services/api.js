@@ -156,6 +156,7 @@ export const panierAPI = {
 // COMMANDES
 // ============================================
 export const commandesAPI = {
+
     // Récupérer toutes les commandes
     getAll: () =>
         apiRequest('/api/commandes'),
@@ -227,6 +228,7 @@ export const commandesAPI = {
     delete: (id) =>
         apiRequest(`/api/commandes/${id}`, {
             method: 'DELETE',
+
         }),
 };
 
@@ -267,19 +269,32 @@ export const paiementsAPI = {
 // AVIS
 // ============================================
 export const avisAPI = {
-  getByProduit: (idProduit) => 
-    apiRequest(`/api/avis/produit/${idProduit}`),
+    getByProduit: (idProduit) =>
+        apiRequest(`/api/avis/produit/${idProduit}`),
 
-  create: (data) =>
-    apiRequest('/api/avis', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    }),
+    create: (data) =>
+        apiRequest('/api/avis', {
+            method: 'POST',
+            body: JSON.stringify(data),
+        }),
 
-  marquerUtile: (id) =>
-    apiRequest(`/api/avis/${id}/utile`, {
-      method: 'POST',
-    }),
+    // ✅ NOUVEAU : Modifier un avis
+    update: (id, data) =>
+        apiRequest(`/api/avis/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(data),
+        }),
+
+    // ✅ NOUVEAU : Supprimer un avis
+    delete: (id) =>
+        apiRequest(`/api/avis/${id}`, {
+            method: 'DELETE',
+        }),
+
+    marquerUtile: (id) =>
+        apiRequest(`/api/avis/${id}/utile`, {
+            method: 'POST',
+        }),
 };
 
 // ============================================
