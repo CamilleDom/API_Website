@@ -31,45 +31,30 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            // Activer CORS
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            
-            // Désactiver CSRF
             .csrf(csrf -> csrf.disable())
-            
-            // Configuration des autorisations
             .authorizeHttpRequests(auth -> auth
-                // Endpoints publics - Authentification
                 .requestMatchers("/auth/**").permitAll()
-                
-                // Endpoints publics - Lecture
                 .requestMatchers(HttpMethod.GET, "/api/produits/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/avis/produit/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/points-retrait/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/stocks/produit/**").permitAll()
-                
-                // Endpoints protégés par API Key
+
+                // Autoriser l'accès à /graphql (les mutations admin sont protégées par @PreAuthorize)
+                .requestMatchers("/graphql").permitAll()
+
                 .requestMatchers("/api/admin/**").authenticated()
                 .requestMatchers("/api/external/**").authenticated()
-                
-                // Tous les autres endpoints nécessitent une authentification JWT
                 .anyRequest().authenticated()
             )
-            
-            // Session stateless
-            .sessionManagement(session -> 
-                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            )
-            
-            // Ordre des filtres
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class)
             .addFilterBefore(apiKeyFilter, UsernamePasswordAuthenticationFilter.class)
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
-
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();

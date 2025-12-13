@@ -1,5 +1,6 @@
 // Configuration de base de l'API
 const API_BASE_URL = 'http://localhost:8080';
+export const API_URL = API_BASE_URL;  // ✅ AJOUT de l'export
 
 // Token JWT pour l'authentification
 const getToken = () => localStorage.getItem('token');
@@ -336,7 +337,8 @@ export const livraisonsAPI = {
     apiRequest(`/api/livraisons/suivi/${numeroSuivi}`),
 };
 
-export default {
+// ✅ NOUVEAU
+const api = {
   auth: authAPI,
   categories: categoriesAPI,
   produits: produitsAPI,
@@ -349,3 +351,5 @@ export default {
   stocks: stocksAPI,
   livraisons: livraisonsAPI,
 };
+
+export default api;

@@ -1,0 +1,448 @@
+/* ========================================
+   HOMEPAGE STYLES
+======================================== */
+
+.home-page {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0;
+}
+
+/* ========================================
+   HERO SECTION
+======================================== */
+.hero {
+    position: relative;
+    min-height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: var(--spacing-3xl) var(--spacing-xl);
+    margin-bottom: var(--spacing-3xl);
+    background: 
+        radial-gradient(ellipse at 50% 0%, rgba(168, 85, 247, 0.15) 0%, transparent 60%),
+        radial-gradient(ellipse at 100% 100%, rgba(99, 102, 241, 0.1) 0%, transparent 50%);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+}
+
+.hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        linear-gradient(135deg, rgba(147, 51, 234, 0.05) 0%, transparent 50%),
+        linear-gradient(225deg, rgba(99, 102, 241, 0.05) 0%, transparent 50%);
+    pointer-events: none;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 1;
+    max-width: 800px;
+}
+
+.hero h1 {
+    font-size: clamp(2.5rem, 6vw, 4rem);
+    margin-bottom: var(--spacing-md);
+    animation: fadeInUp 0.8s ease-out;
+}
+
+.hero-subtitle {
+    font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+    color: var(--gray-300);
+    margin-bottom: var(--spacing-2xl);
+    animation: fadeInUp 0.8s ease-out 0.1s both;
+}
+
+/* ========================================
+   HERO BUTTONS
+======================================== */
+.hero-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-lg);
+    justify-content: center;
+    animation: fadeInUp 0.8s ease-out 0.2s both;
+}
+
+.hero-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md) var(--spacing-2xl);
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-decoration: none;
+    border-radius: var(--radius-lg);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    border: none;
+    min-width: 220px;
+}
+
+.hero-btn .btn-icon {
+    font-size: 1.3rem;
+    transition: transform 0.3s ease;
+}
+
+.hero-btn .btn-text {
+    position: relative;
+    z-index: 1;
+}
+
+/* Primary Button (Violet gradient) */
+.hero-btn-primary {
+    background: var(--gradient-button);
+    color: var(--white);
+    box-shadow: 
+        0 4px 15px rgba(147, 51, 234, 0.4),
+        0 0 0 1px rgba(168, 85, 247, 0.3);
+}
+
+.hero-btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.hero-btn-primary:hover {
+    background: var(--gradient-hover);
+    transform: translateY(-3px);
+    box-shadow: 
+        0 8px 25px rgba(147, 51, 234, 0.5),
+        0 0 0 1px rgba(168, 85, 247, 0.5);
+}
+
+.hero-btn-primary:hover::before {
+    left: 100%;
+}
+
+.hero-btn-primary:hover .btn-icon {
+    transform: scale(1.2) rotate(-5deg);
+}
+
+.hero-btn-primary:active {
+    transform: translateY(-1px);
+}
+
+/* Secondary Button (Bordered) */
+.hero-btn-secondary {
+    background: rgba(168, 85, 247, 0.1);
+    color: var(--purple-400);
+    border: 2px solid var(--purple-500);
+    backdrop-filter: blur(10px);
+}
+
+.hero-btn-secondary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--purple-500);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 0;
+}
+
+.hero-btn-secondary:hover {
+    color: var(--white);
+    border-color: var(--purple-400);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(168, 85, 247, 0.3);
+}
+
+.hero-btn-secondary:hover::before {
+    opacity: 1;
+}
+
+.hero-btn-secondary:hover .btn-icon {
+    transform: scale(1.2);
+}
+
+.hero-btn-secondary:active {
+    transform: translateY(-1px);
+}
+
+/* Accent Button (For pickup points) */
+.hero-btn-accent {
+    background: linear-gradient(135deg, #ec4899 0%, #f97316 100%);
+    color: var(--white);
+    box-shadow: 
+        0 4px 15px rgba(236, 72, 153, 0.4),
+        0 0 0 1px rgba(236, 72, 153, 0.3);
+}
+
+.hero-btn-accent::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.hero-btn-accent:hover {
+    background: linear-gradient(135deg, #f472b6 0%, #fb923c 100%);
+    transform: translateY(-3px);
+    box-shadow: 
+        0 8px 25px rgba(236, 72, 153, 0.5),
+        0 0 0 1px rgba(236, 72, 153, 0.5);
+}
+
+.hero-btn-accent:hover::before {
+    left: 100%;
+}
+
+.hero-btn-accent:hover .btn-icon {
+    transform: scale(1.2) rotate(10deg);
+}
+
+/* ========================================
+   PICKUP SECTION
+======================================== */
+.pickup-section {
+    margin-bottom: var(--spacing-3xl);
+    padding: 0 var(--spacing-xl);
+}
+
+.pickup-content {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xl);
+    padding: var(--spacing-2xl);
+    background: var(--gradient-card);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(168, 85, 247, 0.2);
+    border-radius: var(--radius-xl);
+    transition: all 0.3s ease;
+}
+
+.pickup-content:hover {
+    border-color: rgba(168, 85, 247, 0.4);
+    box-shadow: var(--shadow-purple);
+}
+
+.pickup-icon {
+    font-size: 3rem;
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(236, 72, 153, 0.1);
+    border-radius: var(--radius-lg);
+    flex-shrink: 0;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.pickup-info {
+    flex: 1;
+}
+
+.pickup-info h2 {
+    font-size: 1.8rem;
+    margin-bottom: var(--spacing-xs);
+    color: var(--white);
+}
+
+.pickup-info p {
+    color: var(--gray-400);
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+/* ========================================
+   CATEGORIES SECTION
+======================================== */
+.home-categories {
+    margin-bottom: var(--spacing-3xl);
+    padding: var(--spacing-2xl);
+}
+
+.home-categories h2 {
+    text-align: center;
+    margin-bottom: var(--spacing-2xl);
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.categories-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: var(--spacing-lg);
+}
+
+.category-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: var(--spacing-xl);
+    background: var(--gradient-card);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(168, 85, 247, 0.15);
+    border-radius: var(--radius-xl);
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.category-card:hover {
+    transform: translateY(-8px);
+    border-color: rgba(168, 85, 247, 0.4);
+    box-shadow: var(--shadow-purple);
+}
+
+.category-icon {
+    font-size: 2.5rem;
+    margin-bottom: var(--spacing-md);
+    width: 70px;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(168, 85, 247, 0.1);
+    border-radius: var(--radius-lg);
+    transition: transform 0.3s ease;
+}
+
+.category-card:hover .category-icon {
+    transform: scale(1.1) rotate(-5deg);
+}
+
+.category-card h3 {
+    color: var(--white);
+    font-size: 1.1rem;
+    margin-bottom: var(--spacing-sm);
+}
+
+.category-card p {
+    color: var(--gray-400);
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+/* ========================================
+   FEATURED PRODUCTS SECTION
+======================================== */
+.featured-products {
+    margin-bottom: var(--spacing-3xl);
+    padding: var(--spacing-2xl);
+}
+
+.featured-products h2 {
+    text-align: center;
+    margin-bottom: var(--spacing-2xl);
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.section-footer {
+    display: flex;
+    justify-content: center;
+    margin-top: var(--spacing-2xl);
+}
+
+/* ========================================
+   ANIMATIONS
+======================================== */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+/* ========================================
+   RESPONSIVE
+======================================== */
+@media (max-width: 768px) {
+    .hero {
+        padding: var(--spacing-2xl) var(--spacing-lg);
+        min-height: 350px;
+    }
+
+    .hero-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .hero-btn {
+        width: 100%;
+        max-width: 300px;
+        min-width: unset;
+    }
+
+    .pickup-content {
+        flex-direction: column;
+        text-align: center;
+        gap: var(--spacing-lg);
+    }
+
+    .pickup-info {
+        order: -1;
+    }
+
+    .categories-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--spacing-md);
+    }
+}
+
+@media (max-width: 480px) {
+    .hero h1 {
+        font-size: 2rem;
+    }
+
+    .hero-subtitle {
+        font-size: 1rem;
+    }
+
+    .hero-btn {
+        padding: var(--spacing-sm) var(--spacing-lg);
+        font-size: 1rem;
+    }
+
+    .categories-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .pickup-icon {
+        width: 60px;
+        height: 60px;
+        font-size: 2rem;
+    }
+}
