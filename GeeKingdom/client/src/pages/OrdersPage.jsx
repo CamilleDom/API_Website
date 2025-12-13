@@ -292,8 +292,9 @@ function OrdersPage() {
                     <span className="empty-icon">📭</span>
                     <h3>Aucune commande</h3>
                     <p>Vous n'avez pas encore passé de commande.</p>
-                    <Link to="/products" className="btn-primary">
-                        Découvrir nos produits
+                    <Link to="/products" className="orders-empty-btn">
+                        <span className="btn-icon">🛍️</span>
+                        <span className="btn-text">Découvrir nos produits</span>
                     </Link>
                 </div>
             ) : (
