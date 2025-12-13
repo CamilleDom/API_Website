@@ -1,0 +1,83 @@
+<component name="libraryTable">
+  <library name="io.swagger.core.v3.maven.plugin.jakarta" type="repository">
+    <properties maven-id="io.swagger.core.v3:swagger-maven-plugin-jakarta:2.2.19" />
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/swagger-maven-plugin-jakarta-2.2.19.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/commons-lang3-3.13.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/plexus-utils-3.5.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/plexus-component-annotations-2.1.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/swagger-jaxrs2-jakarta-2.2.19.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/classgraph-4.8.162.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/javassist-3.29.2-GA.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/swagger-models-jakarta-2.2.19.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jackson-annotations-2.15.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/swagger-annotations-jakarta-2.2.19.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/swagger-integration-jakarta-2.2.19.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/swagger-core-jakarta-2.2.19.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/slf4j-api-2.0.9.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jakarta.xml.bind-api-3.0.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jakarta.activation-2.0.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jakarta.validation-api-3.0.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jackson-dataformat-yaml-2.15.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jackson-datatype-jsr310-2.15.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/snakeyaml-2.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jackson-databind-2.15.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jackson-core-2.15.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jackson-jakarta-rs-json-provider-2.15.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jackson-jakarta-rs-base-2.15.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jackson-module-jakarta-xmlbind-annotations-2.15.2.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$PROJECT_DIR$/lib/swagger-maven-plugin-jakarta-2.2.19-javadoc.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/commons-lang3-3.13.0-javadoc.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/plexus-utils-3.5.1-javadoc.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/plexus-component-annotations-2.1.1-javadoc.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/swagger-jaxrs2-jakarta-2.2.19-javadoc.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/classgraph-4.8.162-javadoc.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/javassist-3.29.2-GA-javadoc.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/swagger-models-jakarta-2.2.19-javadoc.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jackson-annotations-2.15.2-javadoc.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/swagger-annotations-jakarta-2.2.19-javadoc.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/swagger-integration-jakarta-2.2.19-javadoc.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/swagger-core-jakarta-2.2.19-javadoc.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/slf4j-api-2.0.9-javadoc.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jakarta.xml.bind-api-3.0.0-javadoc.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jakarta.activation-2.0.0-javadoc.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jakarta.validation-api-3.0.2-javadoc.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jackson-dataformat-yaml-2.15.2-javadoc.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jackson-datatype-jsr310-2.15.2-javadoc.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/snakeyaml-2.2-javadoc.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jackson-databind-2.15.2-javadoc.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jackson-core-2.15.2-javadoc.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jackson-jakarta-rs-json-provider-2.15.2-javadoc.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jackson-jakarta-rs-base-2.15.2-javadoc.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jackson-module-jakarta-xmlbind-annotations-2.15.2-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$PROJECT_DIR$/lib/swagger-maven-plugin-jakarta-2.2.19-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/commons-lang3-3.13.0-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/plexus-utils-3.5.1-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/plexus-component-annotations-2.1.1-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/swagger-jaxrs2-jakarta-2.2.19-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/classgraph-4.8.162-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/javassist-3.29.2-GA-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/swagger-models-jakarta-2.2.19-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jackson-annotations-2.15.2-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/swagger-annotations-jakarta-2.2.19-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/swagger-integration-jakarta-2.2.19-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/swagger-core-jakarta-2.2.19-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/slf4j-api-2.0.9-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jakarta.xml.bind-api-3.0.0-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jakarta.activation-2.0.0-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jakarta.validation-api-3.0.2-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jackson-dataformat-yaml-2.15.2-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jackson-datatype-jsr310-2.15.2-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/snakeyaml-2.2-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jackson-databind-2.15.2-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jackson-core-2.15.2-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jackson-jakarta-rs-json-provider-2.15.2-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jackson-jakarta-rs-base-2.15.2-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jackson-module-jakarta-xmlbind-annotations-2.15.2-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

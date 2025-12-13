@@ -1,0 +1,351 @@
+# src/main/resources/graphql/schema.graphqls
+
+# ============================================
+# TYPES PRINCIPAUX
+# ============================================
+
+type Utilisateur {
+    idUtilisateur: ID!
+    nom: String!
+    prenom: String!
+    email: String!
+    telephone: String
+    adresse: String
+    ville: String
+    codePostal: String
+    pays: String
+    dateInscription: String
+    dateDerniereConnexion: String
+    statut: StatutUtilisateur!
+    role: RoleUtilisateur!
+}
+
+type Produit {
+    idProduit: ID!
+    nomProduit: String!
+    description: String
+    prix: Float!
+    idCategorie: Int!
+    marque: String
+    poids: Float
+    dimensions: String
+    statut: StatutProduit!
+    dateCreation: String
+    noteMoyenne: Float
+    nombreAvis: Int
+}
+
+type Commande {
+    idCommande: ID!
+    idUtilisateur: Int!
+    numeroCommande: String!
+    montantTotal: Float!
+    montantLivraison: Float
+    montantTaxe: Float
+    statut: StatutCommande!
+    adresseLivraison: String!
+    villeLivraison: String!
+    codePostalLivraison: String!
+    paysLivraison: String
+    dateCommande: String
+    commentaires: String
+    codePromo: String
+    reduction: Float
+    utilisateur: Utilisateur
+}
+
+type AvisProduit {
+    idAvis: ID!
+    idProduit: Int!
+    idUtilisateur: Int!
+    note: Int!
+    commentaire: String
+    dateAvis: String
+    statutModeration: StatutModeration!
+    utileCount: Int
+    utilisateur: Utilisateur
+    produit: Produit
+}
+
+type Stock {
+    idStock: ID!
+    idProduit: Int!
+    quantiteDisponible: Int!
+    quantiteReservee: Int!
+    seuilAlerte: Int!
+    emplacement: String
+    dateDerniereMaj: String
+    produit: Produit
+}
+
+type Categorie {
+    idCategorie: ID!
+    nomCategorie: String!
+    description: String
+    categorieParenteId: Int
+    imageUrl: String
+    dateCreation: String
+}
+
+type Paiement {
+    idPaiement: ID!
+    idCommande: Int!
+    montant: Float!
+    methodePaiement: MethodePaiement!
+    statutPaiement: StatutPaiement!
+    transactionId: String
+    datePaiement: String
+}
+
+# ============================================
+# ENUMS
+# ============================================
+
+enum StatutUtilisateur {
+    actif
+    inactif
+    suspendu
+}
+
+enum RoleUtilisateur {
+    client
+    admin
+    vendeur
+}
+
+enum StatutProduit {
+    disponible
+    rupture
+    archive
+}
+
+enum StatutCommande {
+    en_attente
+    confirmee
+    en_preparation
+    expediee
+    livree
+    annulee
+}
+
+enum StatutModeration {
+    en_attente
+    approuve
+    rejete
+}
+
+enum MethodePaiement {
+    carte_bancaire
+    paypal
+    virement
+    especes
+    cheque
+}
+
+enum StatutPaiement {
+    en_attente
+    reussi
+    echoue
+    rembourse
+}
+
+# ============================================
+# TYPES POUR STATISTIQUES ET RÉSULTATS
+# ============================================
+
+type AdminStats {
+    totalUtilisateurs: Int!
+    utilisateursActifs: Int!
+    utilisateursSuspendus: Int!
+    totalProduits: Int!
+    produitsDisponibles: Int!
+    produitsEnRupture: Int!
+    totalCommandes: Int!
+    commandesEnAttente: Int!
+    commandesExpediees: Int!
+    commandesLivrees: Int!
+    chiffreAffaires: Float!
+    avisEnAttente: Int!
+    stocksEnAlerte: Int!
+}
+
+type ModerationResult {
+    success: Boolean!
+    message: String!
+    avis: AvisProduit
+}
+
+type ActionResult {
+    success: Boolean!
+    message: String!
+    id: ID
+}
+
+type StockAlert {
+    produit: Produit!
+    stock: Stock!
+    alertLevel: String!
+}
+
+type CommandeStats {
+    date: String!
+    nombreCommandes: Int!
+    montantTotal: Float!
+}
+
+# Pagination
+type PageInfo {
+    totalElements: Int!
+    totalPages: Int!
+    currentPage: Int!
+    pageSize: Int!
+    hasNext: Boolean!
+    hasPrevious: Boolean!
+}
+
+type UtilisateurPage {
+    content: [Utilisateur!]!
+    pageInfo: PageInfo!
+}
+
+type CommandePage {
+    content: [Commande!]!
+    pageInfo: PageInfo!
+}
+
+type AvisPage {
+    content: [AvisProduit!]!
+    pageInfo: PageInfo!
+}
+
+type ProduitPage {
+    content: [Produit!]!
+    pageInfo: PageInfo!
+}
+
+# ============================================
+# INPUTS
+# ============================================
+
+input UtilisateurInput {
+    nom: String
+    prenom: String
+    email: String
+    telephone: String
+    adresse: String
+    ville: String
+    codePostal: String
+    pays: String
+    statut: StatutUtilisateur
+    role: RoleUtilisateur
+}
+
+input ProduitInput {
+    nomProduit: String!
+    description: String
+    prix: Float!
+    idCategorie: Int!
+    marque: String
+    poids: Float
+    dimensions: String
+    statut: StatutProduit
+}
+
+input CommandeFilterInput {
+    statut: StatutCommande
+    idUtilisateur: Int
+    dateDebut: String
+    dateFin: String
+}
+
+input StockInput {
+    idProduit: Int!
+    quantite: Int!
+    commentaire: String
+}
+
+# ============================================
+# QUERIES
+# ============================================
+
+type Query {
+    # === DASHBOARD ===
+    adminStats: AdminStats!
+    
+    # === UTILISATEURS ===
+    utilisateurs(page: Int = 0, size: Int = 20): UtilisateurPage!
+    utilisateur(id: ID!): Utilisateur
+    utilisateursByStatut(statut: StatutUtilisateur!): [Utilisateur!]!
+    utilisateursByRole(role: RoleUtilisateur!): [Utilisateur!]!
+    searchUtilisateurs(query: String!): [Utilisateur!]!
+    
+    # === PRODUITS ===
+    produits(page: Int = 0, size: Int = 20): ProduitPage!
+    produit(id: ID!): Produit
+    produitsByStatut(statut: StatutProduit!): [Produit!]!
+    produitsByCategorie(idCategorie: Int!): [Produit!]!
+    
+    # === COMMANDES ===
+    commandes(page: Int = 0, size: Int = 20, filter: CommandeFilterInput): CommandePage!
+    commande(id: ID!): Commande
+    commandeByNumero(numero: String!): Commande
+    commandesByStatut(statut: StatutCommande!): [Commande!]!
+    commandesRecentes(limit: Int = 10): [Commande!]!
+    
+    # === AVIS / MODÉRATION ===
+    avisEnAttente(page: Int = 0, size: Int = 20): AvisPage!
+    avisParStatut(statut: StatutModeration!, page: Int = 0, size: Int = 20): AvisPage!
+    avis(id: ID!): AvisProduit
+    avisProduit(idProduit: Int!): [AvisProduit!]!
+    
+    # === STOCKS ===
+    stocks: [Stock!]!
+    stocksEnAlerte: [StockAlert!]!
+    stocksEnRupture: [Stock!]!
+    stockProduit(idProduit: Int!): Stock
+    
+    # === CATÉGORIES ===
+    categories: [Categorie!]!
+    categorie(id: ID!): Categorie
+    
+    # === PAIEMENTS ===
+    paiementsCommande(idCommande: Int!): [Paiement!]!
+}
+
+# ============================================
+# MUTATIONS
+# ============================================
+
+type Mutation {
+    # === MODÉRATION DES AVIS ===
+    approuverAvis(id: ID!): ModerationResult!
+    rejeterAvis(id: ID!, motif: String): ModerationResult!
+    supprimerAvis(id: ID!): ActionResult!
+    
+    # === GESTION DES UTILISATEURS ===
+    suspendreUtilisateur(id: ID!, motif: String): ActionResult!
+    activerUtilisateur(id: ID!): ActionResult!
+    changerRoleUtilisateur(id: ID!, role: RoleUtilisateur!): ActionResult!
+    updateUtilisateur(id: ID!, input: UtilisateurInput!): Utilisateur
+    supprimerUtilisateur(id: ID!): ActionResult!
+    
+    # === GESTION DES COMMANDES ===
+    changerStatutCommande(id: ID!, statut: StatutCommande!): ActionResult!
+    annulerCommande(id: ID!, motif: String): ActionResult!
+    
+    # === GESTION DES PRODUITS ===
+    createProduit(input: ProduitInput!): Produit!
+    updateProduit(id: ID!, input: ProduitInput!): Produit
+    changerStatutProduit(id: ID!, statut: StatutProduit!): ActionResult!
+    supprimerProduit(id: ID!): ActionResult!
+    
+    # === GESTION DES STOCKS ===
+    approvisionnerStock(input: StockInput!): ActionResult!
+    ajusterStock(idProduit: Int!, quantite: Int!, commentaire: String): ActionResult!
+    modifierSeuilAlerte(idProduit: Int!, seuil: Int!): ActionResult!
+    
+    # === GESTION DES CATÉGORIES ===
+    createCategorie(nom: String!, description: String, imageUrl: String): Categorie!
+    updateCategorie(id: ID!, nom: String, description: String, imageUrl: String): Categorie
+    supprimerCategorie(id: ID!): ActionResult!
+}
