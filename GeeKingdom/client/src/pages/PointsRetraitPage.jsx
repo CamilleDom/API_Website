@@ -105,19 +105,86 @@ function PointsRetraitPage() {
         if (!horairesObj) return null;
 
         const jours = {
-            lundi: 'Lun',
-            mardi: 'Mar',
-            mercredi: 'Mer',
-            jeudi: 'Jeu',
-            vendredi: 'Ven',
-            samedi: 'Sam',
-            dimanche: 'Dim'
+            lundi: 'Lundi',
+            mardi: 'Mardi',
+            mercredi: 'Mercredi',
+            jeudi: 'Jeudi',
+            vendredi: 'Vendredi',
+            samedi: 'Samedi',
+            dimanche: 'Dimanche'
         };
 
         return Object.entries(jours).map(([key, label]) => ({
             jour: label,
+            key: key,
             horaire: horairesObj[key] || 'Fermé'
         }));
+    };
+
+    // Fonction pour vérifier si le magasin est ouvert selon l'heure actuelle
+    const isStoreOpen = (horairesJson) => {
+        const horaires = parseHoraires(horairesJson);
+        if (!horaires) return { isOpen: false, status: 'unknown', message: 'Horaires non disponibles' };
+
+        const now = new Date();
+        const joursSemaine = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
+        const jourActuel = joursSemaine[now.getDay()];
+        const heureActuelle = now.getHours() * 60 + now.getMinutes(); // en minutes
+
+        const horairesJour = horaires[jourActuel];
+
+        if (!horairesJour || horairesJour.toLowerCase() === 'fermé') {
+            return { isOpen: false, status: 'closed', message: 'Fermé aujourd\'hui' };
+        }
+
+        // Parser les horaires (format: "9h-19h" ou "9h00-12h00, 14h00-19h00")
+        const plages = horairesJour.split(',').map(p => p.trim());
+
+        for (const plage of plages) {
+            const match = plage.match(/(\d{1,2})h?(\d{0,2})?\s*-\s*(\d{1,2})h?(\d{0,2})?/i);
+            if (match) {
+                const ouverture = parseInt(match[1]) * 60 + (parseInt(match[2]) || 0);
+                const fermeture = parseInt(match[3]) * 60 + (parseInt(match[4]) || 0);
+
+                if (heureActuelle >= ouverture && heureActuelle < fermeture) {
+                    const minutesRestantes = fermeture - heureActuelle;
+                    if (minutesRestantes <= 60) {
+                        return {
+                            isOpen: true,
+                            status: 'closing-soon',
+                            message: `Ferme dans ${minutesRestantes} min`
+                        };
+                    }
+                    return {
+                        isOpen: true,
+                        status: 'open',
+                        message: `Ouvert jusqu'à ${match[3]}h${match[4] || '00'}`
+                    };
+                }
+            }
+        }
+
+        // Trouver la prochaine ouverture
+        const prochainePlage = plages[0];
+        const matchProchain = prochainePlage.match(/(\d{1,2})h?(\d{0,2})?/);
+        if (matchProchain) {
+            const prochaineOuverture = parseInt(matchProchain[1]);
+            if (heureActuelle < prochaineOuverture * 60) {
+                return {
+                    isOpen: false,
+                    status: 'closed',
+                    message: `Ouvre à ${prochaineOuverture}h`
+                };
+            }
+        }
+
+        return { isOpen: false, status: 'closed', message: 'Fermé' };
+    };
+
+    // Obtenir le jour actuel pour le mettre en surbrillance
+    const getCurrentDay = () => {
+        const jours = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
+        return jours[new Date().getDay()];
     };
 
     if (loading) return <Loader message="Chargement des points de retrait..." />;
@@ -161,146 +228,193 @@ function PointsRetraitPage() {
             </div>
 
             <div className="points-content-grid">
+                {/* Liste des points */}
                 <div className="points-cards-container">
                     <div className="points-count">
                         {points.length} point{points.length > 1 ? 's' : ''} disponible{points.length > 1 ? 's' : ''}
                     </div>
 
-                    <div className="points-cards-grid">
+                    <div className="points-cards-list">
                         {points.length === 0 ? (
                             <div className="no-points">
                                 <p>❌ Aucun point de retrait trouvé</p>
                                 <p className="no-points-hint">Essayez une autre recherche</p>
                             </div>
                         ) : (
-                            points.map(point => (
-                                <div
-                                    key={point.idPointRetrait}
-                                    className={`point-card ${selectedPoint?.idPointRetrait === point.idPointRetrait ? 'selected' : ''}`}
-                                    onClick={() => handleCardClick(point)}
-                                >
-                                    <div className="card-header">
-                                        <h3 className="point-name">{point.nomPoint}</h3>
-                                        <span className={`point-status status-${point.statut}`}>
-                      {point.statut === 'actif' ? '✓ Ouvert' :
-                          point.statut === 'temporairement_ferme' ? '⚠ Temporaire' :
-                              '✗ Fermé'}
-                    </span>
-                                    </div>
+                            points.map(point => {
+                                const storeStatus = isStoreOpen(point.horairesJson);
+                                return (
+                                    <div
+                                        key={point.idPointRetrait}
+                                        className={`point-card ${selectedPoint?.idPointRetrait === point.idPointRetrait ? 'selected' : ''}`}
+                                        onClick={() => handleCardClick(point)}
+                                    >
+                                        <div className="card-header">
+                                            <h3 className="point-name">{point.nomPoint}</h3>
+                                            <span className={`point-status-badge ${storeStatus.status}`}>
+                                                {storeStatus.isOpen ? (
+                                                    <><span className="status-dot"></span> Ouvert</>
+                                                ) : (
+                                                    <><span className="status-dot"></span> Fermé</>
+                                                )}
+                                            </span>
+                                        </div>
 
-                                    <div className="card-body">
-                                        <div className="point-info">
+                                        <div className="card-body">
                                             <div className="info-row">
                                                 <span className="info-icon">📍</span>
-                                                <div className="info-text">
-                                                    <p className="point-address">{point.adresse}</p>
-                                                    <p className="point-city">{point.codePostal} {point.ville}</p>
+                                                <div className="info-content">
+                                                    <span className="info-primary">{point.adresse}</span>
+                                                    <span className="info-secondary">{point.codePostal} {point.ville}</span>
                                                 </div>
                                             </div>
 
                                             {point.telephone && (
                                                 <div className="info-row">
                                                     <span className="info-icon">📞</span>
-                                                    <p className="point-phone">{point.telephone}</p>
+                                                    <span className="info-primary">{point.telephone}</span>
                                                 </div>
                                             )}
 
                                             {point.distance && (
                                                 <div className="info-row">
                                                     <span className="info-icon">🚗</span>
-                                                    <p className="point-distance">
-                                                        À {point.distance.toFixed(1)} km
-                                                    </p>
+                                                    <span className="info-distance">À {point.distance.toFixed(1)} km</span>
                                                 </div>
                                             )}
                                         </div>
 
-                                        {parseHoraires(point.horairesJson) && (
-                                            <div className="point-horaires-preview">
-                                                <span className="horaires-icon">🕐</span>
-                                                <span className="horaires-text">Voir les horaires</span>
-                                            </div>
-                                        )}
+                                        <div className="card-footer">
+                                            <button className="btn-view-map">
+                                                Voir sur la carte →
+                                            </button>
+                                        </div>
                                     </div>
-
-                                    <div className="card-footer">
-                                        <button className="btn-select">
-                                            Voir sur la carte →
-                                        </button>
-                                    </div>
-                                </div>
-                            ))
+                                );
+                            })
                         )}
                     </div>
                 </div>
 
+                {/* Section carte et détails */}
                 <div className="points-map-section" ref={mapRef}>
-                    <div className="map-container">
-                        {selectedPoint ? (
-                            <>
-                                <div className="map-header">
-                                    <h3>📍 {selectedPoint.nomPoint}</h3>
-                                    <button
-                                        className="btn-close-map"
-                                        onClick={() => setSelectedPoint(null)}
-                                    >
-                                        ✕
-                                    </button>
+                    {selectedPoint ? (
+                        <div className="map-details-container">
+                            {/* Header avec nom et bouton fermer */}
+                            <div className="map-header">
+                                <div className="map-header-info">
+                                    <span className="map-header-icon">📍</span>
+                                    <h3>{selectedPoint.nomPoint}</h3>
                                 </div>
+                                <button
+                                    className="btn-close-map"
+                                    onClick={() => setSelectedPoint(null)}
+                                    aria-label="Fermer"
+                                >
+                                    ✕
+                                </button>
+                            </div>
 
-                                <div className="map-wrapper">
-                                    <MapIframe
-                                        latitude={parseFloat(selectedPoint.latitude)}
-                                        longitude={parseFloat(selectedPoint.longitude)}
-                                    />
-                                </div>
+                            {/* Carte */}
+                            <div className="map-wrapper">
+                                <MapIframe
+                                    latitude={parseFloat(selectedPoint.latitude)}
+                                    longitude={parseFloat(selectedPoint.longitude)}
+                                />
+                            </div>
 
-                                <div className="map-details">
-                                    <div className="detail-section">
-                                        <h4>📍 Adresse</h4>
-                                        <p>{selectedPoint.adresse}</p>
-                                        <p>{selectedPoint.codePostal} {selectedPoint.ville}, {selectedPoint.pays}</p>
+                            {/* Détails du magasin */}
+                            <div className="store-details">
+                                {/* Statut actuel */}
+                                {(() => {
+                                    const status = isStoreOpen(selectedPoint.horairesJson);
+                                    return (
+                                        <div className={`store-status-banner ${status.status}`}>
+                                            <span className="status-indicator"></span>
+                                            <span className="status-text">
+                                                {status.isOpen ? 'Actuellement ouvert' : 'Actuellement fermé'}
+                                            </span>
+                                            <span className="status-detail">{status.message}</span>
+                                        </div>
+                                    );
+                                })()}
+
+                                {/* Adresse */}
+                                <div className="detail-block">
+                                    <div className="detail-header">
+                                        <span className="detail-icon">📍</span>
+                                        <h4>Adresse</h4>
                                     </div>
+                                    <div className="detail-content">
+                                        <p>{selectedPoint.adresse}</p>
+                                        <p>{selectedPoint.codePostal} {selectedPoint.ville}, {selectedPoint.pays || 'France'}</p>
+                                    </div>
+                                </div>
 
-                                    {selectedPoint.telephone && (
-                                        <div className="detail-section">
-                                            <h4>📞 Contact</h4>
-                                            <p>{selectedPoint.telephone}</p>
+                                {/* Téléphone */}
+                                {selectedPoint.telephone && (
+                                    <div className="detail-block">
+                                        <div className="detail-header">
+                                            <span className="detail-icon">📞</span>
+                                            <h4>Téléphone</h4>
                                         </div>
-                                    )}
-
-                                    {parseHoraires(selectedPoint.horairesJson) && (
-                                        <div className="detail-section">
-                                            <h4>🕐 Horaires d'ouverture</h4>
-                                            <div className="horaires-grid">
-                                                {formatHoraires(parseHoraires(selectedPoint.horairesJson))?.map((item, idx) => (
-                                                    <div key={idx} className="horaire-row">
-                                                        <span className="horaire-jour">{item.jour}</span>
-                                                        <span className="horaire-time">{item.horaire}</span>
-                                                    </div>
-                                                ))}
-                                            </div>
+                                        <div className="detail-content">
+                                            <a href={`tel:${selectedPoint.telephone}`} className="phone-link">
+                                                {selectedPoint.telephone}
+                                            </a>
                                         </div>
-                                    )}
+                                    </div>
+                                )}
 
-                                    {selectedPoint.capaciteMax && (
-                                        <div className="detail-section">
-                                            <h4>📦 Capacité</h4>
+                                {/* Horaires */}
+                                {parseHoraires(selectedPoint.horairesJson) && (
+                                    <div className="detail-block horaires-block">
+                                        <div className="detail-header">
+                                            <span className="detail-icon">🕐</span>
+                                            <h4>Horaires d'ouverture</h4>
+                                        </div>
+                                        <div className="horaires-list">
+                                            {formatHoraires(parseHoraires(selectedPoint.horairesJson))?.map((item, idx) => (
+                                                <div
+                                                    key={idx}
+                                                    className={`horaire-row ${item.key === getCurrentDay() ? 'current-day' : ''}`}
+                                                >
+                                                    <span className="horaire-jour">
+                                                        {item.key === getCurrentDay() && <span className="today-indicator">●</span>}
+                                                        {item.jour}
+                                                    </span>
+                                                    <span className={`horaire-time ${item.horaire.toLowerCase() === 'fermé' ? 'closed' : ''}`}>
+                                                        {item.horaire}
+                                                    </span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Capacité */}
+                                {selectedPoint.capaciteMax && (
+                                    <div className="detail-block">
+                                        <div className="detail-header">
+                                            <span className="detail-icon">📦</span>
+                                            <h4>Capacité</h4>
+                                        </div>
+                                        <div className="detail-content">
                                             <p>{selectedPoint.capaciteMax} colis maximum</p>
                                         </div>
-                                    )}
-                                </div>
-                            </>
-                        ) : (
-                            <div className="map-placeholder">
-                                <div className="placeholder-content">
-                                    <span className="placeholder-icon">🗺️</span>
-                                    <h3>Sélectionnez un point de retrait</h3>
-                                    <p>Cliquez sur une carte pour voir sa position sur la carte</p>
-                                </div>
+                                    </div>
+                                )}
                             </div>
-                        )}
-                    </div>
+                        </div>
+                    ) : (
+                        <div className="map-placeholder">
+                            <div className="placeholder-content">
+                                <span className="placeholder-icon">🗺️</span>
+                                <h3>Sélectionnez un point de retrait</h3>
+                                <p>Cliquez sur un magasin pour voir sa position et ses détails</p>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </section>
