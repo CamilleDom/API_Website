@@ -9,13 +9,16 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
  * Contrôleur d'authentification SÉCURISÉ
  * Utilise BCrypt pour le hachage des mots de passe
  *
- * @version 2.0 - Sécurité renforcée
+ * ✅ CORRIGÉ: Gestion complète de l'adresse (adresse, ville, codePostal, pays)
+ *
+ * @version 2.1 - Sécurité renforcée + Adresse complète
  */
 @RestController
 @RequestMapping("/auth")
@@ -25,7 +28,7 @@ public class UtilisateurController {
     private UtilisateurRepository utilisateurRepository;
 
     @Autowired
-    private PasswordEncoder passwordEncoder; // ✅ Injection du BCrypt configuré
+    private PasswordEncoder passwordEncoder;
 
     /**
      * 🔐 INSCRIPTION SÉCURISÉE
@@ -59,6 +62,11 @@ public class UtilisateurController {
         utilisateur.setStatut(Utilisateur.Statut.actif);
         utilisateur.setRole(Utilisateur.Role.client);
 
+        // ✅ Valeur par défaut pour le pays si non fourni
+        if (utilisateur.getPays() == null || utilisateur.getPays().isEmpty()) {
+            utilisateur.setPays("France");
+        }
+
         try {
             Utilisateur saved = utilisateurRepository.save(utilisateur);
 
@@ -76,6 +84,7 @@ public class UtilisateurController {
     /**
      * 🔐 CONNEXION SÉCURISÉE
      * Vérifie le mot de passe avec BCrypt
+     * ✅ CORRIGÉ: Inclut tous les champs d'adresse dans la réponse
      */
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> body) {
@@ -90,7 +99,7 @@ public class UtilisateurController {
         }
 
         try {
-            // Rechercher l'utilisateur
+            // Rechercher l'utilisateur (retourne Optional)
             Utilisateur user = utilisateurRepository.findByEmail(email).orElse(null);
 
             // 🔐 VÉRIFICATION SÉCURISÉE DU MOT DE PASSE
@@ -112,15 +121,24 @@ public class UtilisateurController {
                         "ROLE_" + user.getRole().name().toUpperCase()
                 );
 
+                // ✅ CORRIGÉ: Inclure TOUS les champs dans la réponse (y compris adresse)
+                Map<String, Object> userData = new HashMap<>();
+                userData.put("id", user.getIdUtilisateur());
+                userData.put("nom", user.getNom());
+                userData.put("prenom", user.getPrenom());
+                userData.put("email", user.getEmail());
+                userData.put("telephone", user.getTelephone() != null ? user.getTelephone() : "");
+                userData.put("adresse", user.getAdresse() != null ? user.getAdresse() : "");
+                userData.put("ville", user.getVille() != null ? user.getVille() : "");
+                userData.put("codePostal", user.getCodePostal() != null ? user.getCodePostal() : "");
+                userData.put("pays", user.getPays() != null ? user.getPays() : "France");
+                userData.put("role", user.getRole());
+                userData.put("statut", user.getStatut());
+                userData.put("dateInscription", user.getDateInscription());
+
                 return ResponseEntity.ok(Map.of(
                         "token", token,
-                        "user", Map.of(
-                                "id", user.getIdUtilisateur(),
-                                "nom", user.getNom(),
-                                "prenom", user.getPrenom(),
-                                "email", user.getEmail(),
-                                "role", user.getRole()
-                        )
+                        "user", userData
                 ));
             }
 
@@ -138,43 +156,66 @@ public class UtilisateurController {
 
     /**
      * RÉCUPÉRER LE PROFIL UTILISATEUR
+     * ✅ CORRIGÉ: Inclut tous les champs d'adresse
      */
     @GetMapping("/profile/{id}")
     public ResponseEntity<?> getProfile(@PathVariable Integer id) {
         return utilisateurRepository.findById(id)
-                .map(user -> ResponseEntity.ok(Map.of(
-                        "id", user.getIdUtilisateur(),
-                        "nom", user.getNom(),
-                        "prenom", user.getPrenom(),
-                        "email", user.getEmail(),
-                        "telephone", user.getTelephone() != null ? user.getTelephone() : "",
-                        "role", user.getRole(),
-                        "statut", user.getStatut(),
-                        "dateInscription", user.getDateInscription()
-                )))
+                .map(user -> {
+                    Map<String, Object> profile = new HashMap<>();
+                    profile.put("id", user.getIdUtilisateur());
+                    profile.put("nom", user.getNom());
+                    profile.put("prenom", user.getPrenom());
+                    profile.put("email", user.getEmail());
+                    profile.put("telephone", user.getTelephone() != null ? user.getTelephone() : "");
+                    profile.put("adresse", user.getAdresse() != null ? user.getAdresse() : "");
+                    profile.put("ville", user.getVille() != null ? user.getVille() : "");
+                    profile.put("codePostal", user.getCodePostal() != null ? user.getCodePostal() : "");
+                    profile.put("pays", user.getPays() != null ? user.getPays() : "France");
+                    profile.put("role", user.getRole());
+                    profile.put("statut", user.getStatut());
+                    profile.put("dateInscription", user.getDateInscription());
+
+                    return ResponseEntity.ok(profile);
+                })
                 .orElse(ResponseEntity.notFound().build());
     }
 
     /**
      * 🔐 MODIFIER PROFIL (avec gestion sécurisée du mot de passe)
+     * ✅ CORRIGÉ: Gérer TOUS les champs y compris adresse, ville, codePostal, pays
      */
     @PutMapping("/profile/{id}")
     public ResponseEntity<?> updateProfile(@PathVariable Integer id, @RequestBody Map<String, String> updates) {
         return utilisateurRepository.findById(id)
                 .map(user -> {
-                    // Mettre à jour les champs non sensibles
-                    if (updates.containsKey("nom") && !updates.get("nom").isEmpty()) {
+                    // Mettre à jour les informations personnelles
+                    if (updates.containsKey("nom") && updates.get("nom") != null && !updates.get("nom").isEmpty()) {
                         user.setNom(updates.get("nom"));
                     }
-                    if (updates.containsKey("prenom") && !updates.get("prenom").isEmpty()) {
+                    if (updates.containsKey("prenom") && updates.get("prenom") != null && !updates.get("prenom").isEmpty()) {
                         user.setPrenom(updates.get("prenom"));
                     }
                     if (updates.containsKey("telephone")) {
                         user.setTelephone(updates.get("telephone"));
                     }
 
+                    // ✅ AJOUT: Mettre à jour les champs d'adresse
+                    if (updates.containsKey("adresse")) {
+                        user.setAdresse(updates.get("adresse"));
+                    }
+                    if (updates.containsKey("ville")) {
+                        user.setVille(updates.get("ville"));
+                    }
+                    if (updates.containsKey("codePostal")) {
+                        user.setCodePostal(updates.get("codePostal"));
+                    }
+                    if (updates.containsKey("pays")) {
+                        user.setPays(updates.get("pays"));
+                    }
+
                     // 🔐 CHANGEMENT DE MOT DE PASSE SÉCURISÉ
-                    if (updates.containsKey("motDePasse") && !updates.get("motDePasse").isEmpty()) {
+                    if (updates.containsKey("motDePasse") && updates.get("motDePasse") != null && !updates.get("motDePasse").isEmpty()) {
                         String newPassword = updates.get("motDePasse");
 
                         // Validation de la longueur
@@ -191,13 +232,22 @@ public class UtilisateurController {
 
                     utilisateurRepository.save(user);
 
-                    return ResponseEntity.ok(Map.of(
-                            "message", "Profil mis à jour avec succès",
-                            "id", user.getIdUtilisateur(),
-                            "nom", user.getNom(),
-                            "prenom", user.getPrenom(),
-                            "email", user.getEmail()
-                    ));
+                    // ✅ CORRIGÉ: Renvoyer TOUTES les données mises à jour
+                    Map<String, Object> response = new HashMap<>();
+                    response.put("message", "Profil mis à jour avec succès");
+                    response.put("id", user.getIdUtilisateur());
+                    response.put("nom", user.getNom());
+                    response.put("prenom", user.getPrenom());
+                    response.put("email", user.getEmail());
+                    response.put("telephone", user.getTelephone() != null ? user.getTelephone() : "");
+                    response.put("adresse", user.getAdresse() != null ? user.getAdresse() : "");
+                    response.put("ville", user.getVille() != null ? user.getVille() : "");
+                    response.put("codePostal", user.getCodePostal() != null ? user.getCodePostal() : "");
+                    response.put("pays", user.getPays() != null ? user.getPays() : "France");
+                    response.put("role", user.getRole());
+                    response.put("statut", user.getStatut());
+
+                    return ResponseEntity.ok(response);
                 })
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -215,35 +265,39 @@ public class UtilisateurController {
     }
 
     /**
-     * 🔐 CHANGER MOT DE PASSE (avec vérification de l'ancien)
+     * 🔐 CHANGER MOT DE PASSE (endpoint séparé avec vérification ancien mot de passe)
      */
-    @PostMapping("/change-password")
-    public ResponseEntity<?> changePassword(@RequestBody Map<String, String> body) {
-        Integer userId = Integer.parseInt(body.get("userId"));
-        String oldPassword = body.get("oldPassword");
+    @PutMapping("/change-password/{id}")
+    public ResponseEntity<?> changePassword(@PathVariable Integer id, @RequestBody Map<String, String> body) {
+        String currentPassword = body.get("currentPassword");
         String newPassword = body.get("newPassword");
 
-        return utilisateurRepository.findById(userId)
+        if (currentPassword == null || newPassword == null) {
+            return ResponseEntity.badRequest().body(
+                    Map.of("error", "Ancien et nouveau mot de passe requis")
+            );
+        }
+
+        if (newPassword.length() < 6) {
+            return ResponseEntity.badRequest().body(
+                    Map.of("error", "Le nouveau mot de passe doit contenir au moins 6 caractères")
+            );
+        }
+
+        return utilisateurRepository.findById(id)
                 .map(user -> {
                     // Vérifier l'ancien mot de passe
-                    if (!passwordEncoder.matches(oldPassword, user.getMotDePasse())) {
+                    if (!passwordEncoder.matches(currentPassword, user.getMotDePasse())) {
                         return ResponseEntity.status(401).body(
-                                Map.of("error", "Ancien mot de passe incorrect")
+                                Map.of("error", "Mot de passe actuel incorrect")
                         );
                     }
 
-                    // Valider le nouveau mot de passe
-                    if (newPassword.length() < 6) {
-                        return ResponseEntity.badRequest().body(
-                                Map.of("error", "Le nouveau mot de passe doit contenir au moins 6 caractères")
-                        );
-                    }
-
-                    // Hasher et sauvegarder
+                    // Hasher et sauvegarder le nouveau mot de passe
                     user.setMotDePasse(passwordEncoder.encode(newPassword));
                     utilisateurRepository.save(user);
 
-                    return ResponseEntity.ok(Map.of("message", "Mot de passe changé avec succès"));
+                    return ResponseEntity.ok(Map.of("message", "Mot de passe modifié avec succès"));
                 })
                 .orElse(ResponseEntity.notFound().build());
     }

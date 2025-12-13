@@ -3,137 +3,231 @@ import { useAuth } from '../context/AuthContext';
 import Loader from '../components/Loader';
 
 function ProfilePage() {
-  const { user, updateProfile, loading } = useAuth();
-  const [formData, setFormData] = useState({
-    nom: '',
-    prenom: '',
-    telephone: '',
-    adresse: '',
-    ville: '',
-    codePostal: '',
-    pays: '',
-  });
-  const [message, setMessage] = useState({ type: '', text: '' });
-  const [saving, setSaving] = useState(false);
+    const { user, updateProfile, refreshProfile, loading } = useAuth();
+    const [formData, setFormData] = useState({
+        nom: '',
+        prenom: '',
+        telephone: '',
+        adresse: '',
+        ville: '',
+        codePostal: '',
+        pays: '',
+    });
+    const [message, setMessage] = useState({ type: '', text: '' });
+    const [saving, setSaving] = useState(false);
+    const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
-    if (user) {
-      setFormData({
-        nom: user.nom || '',
-        prenom: user.prenom || '',
-        telephone: user.telephone || '',
-        adresse: user.adresse || '',
-        ville: user.ville || '',
-        codePostal: user.codePostal || '',
-        pays: user.pays || 'France',
-      });
+    // ✅ Charger les données du profil
+    useEffect(() => {
+        if (user) {
+            setFormData({
+                nom: user.nom || '',
+                prenom: user.prenom || '',
+                telephone: user.telephone || '',
+                adresse: user.adresse || '',
+                ville: user.ville || '',
+                codePostal: user.codePostal || '',
+                pays: user.pays || 'France',
+            });
+        }
+    }, [user]);
+
+    // ✅ Rafraîchir les données au montage du composant
+    useEffect(() => {
+        const loadFreshData = async () => {
+            if (refreshProfile) {
+                setRefreshing(true);
+                await refreshProfile();
+                setRefreshing(false);
+            }
+        };
+        loadFreshData();
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setMessage({ type: '', text: '' });
+        setSaving(true);
+
+        try {
+            const result = await updateProfile(formData);
+
+            if (result.success) {
+                setMessage({ type: 'success', text: 'Profil mis à jour avec succès !' });
+
+                // ✅ Mettre à jour le formulaire avec les nouvelles données
+                if (result.user) {
+                    setFormData({
+                        nom: result.user.nom || '',
+                        prenom: result.user.prenom || '',
+                        telephone: result.user.telephone || '',
+                        adresse: result.user.adresse || '',
+                        ville: result.user.ville || '',
+                        codePostal: result.user.codePostal || '',
+                        pays: result.user.pays || 'France',
+                    });
+                }
+            } else {
+                setMessage({ type: 'error', text: result.error || 'Erreur lors de la mise à jour' });
+            }
+        } catch (error) {
+            setMessage({ type: 'error', text: 'Une erreur est survenue' });
+        }
+
+        setSaving(false);
+
+        // Effacer le message après 5 secondes
+        setTimeout(() => setMessage({ type: '', text: '' }), 5000);
+    };
+
+    if (loading || refreshing) {
+        return <Loader message="Chargement du profil..." />;
     }
-  }, [user]);
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+    return (
+        <section className="profile-page">
+            <h2>Mon Profil</h2>
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setMessage({ type: '', text: '' });
-    setSaving(true);
+            {message.text && (
+                <div className={`profile-message ${message.type}`}>
+          <span className="message-icon">
+            {message.type === 'success' ? '✅' : '❌'}
+          </span>
+                    <span className="message-text">{message.text}</span>
+                </div>
+            )}
 
-    const result = await updateProfile(formData);
+            <form onSubmit={handleSubmit} className="profile-form">
+                <div className="form-section">
+                    <h3>👤 Informations personnelles</h3>
 
-    if (result.success) {
-      setMessage({ type: 'success', text: 'Profil mis à jour avec succès !' });
-    } else {
-      setMessage({ type: 'error', text: result.error });
-    }
+                    <div className="form-group">
+                        <label htmlFor="prenom">Prénom</label>
+                        <input
+                            type="text"
+                            id="prenom"
+                            name="prenom"
+                            placeholder="Votre prénom"
+                            value={formData.prenom}
+                            onChange={handleChange}
+                        />
+                    </div>
 
-    setSaving(false);
-  };
+                    <div className="form-group">
+                        <label htmlFor="nom">Nom</label>
+                        <input
+                            type="text"
+                            id="nom"
+                            name="nom"
+                            placeholder="Votre nom"
+                            value={formData.nom}
+                            onChange={handleChange}
+                        />
+                    </div>
 
-  if (loading) return <Loader message="Chargement du profil..." />;
+                    <div className="form-group">
+                        <label htmlFor="email">Email</label>
+                        <input
+                            type="email"
+                            id="email"
+                            value={user?.email || ''}
+                            disabled
+                            className="input-disabled"
+                            placeholder="Email (non modifiable)"
+                        />
+                        <span className="field-hint">L'email ne peut pas être modifié</span>
+                    </div>
 
-  return (
-    <section className="profile-page">
-      <h2>Mon Profil</h2>
+                    <div className="form-group">
+                        <label htmlFor="telephone">Téléphone</label>
+                        <input
+                            type="tel"
+                            id="telephone"
+                            name="telephone"
+                            placeholder="Votre numéro de téléphone"
+                            value={formData.telephone}
+                            onChange={handleChange}
+                        />
+                    </div>
+                </div>
 
-      {message.text && (
-        <p className={`${message.type}-message`}>{message.text}</p>
-      )}
+                <div className="form-section">
+                    <h3>📍 Adresse</h3>
 
-      <form onSubmit={handleSubmit} className="profile-form">
-        <div className="form-section">
-          <h3>Informations personnelles</h3>
-          <div className="input-row">
-            <input
-              type="text"
-              name="prenom"
-              placeholder="Prénom"
-              value={formData.prenom}
-              onChange={handleChange}
-            />
-            <input
-              type="text"
-              name="nom"
-              placeholder="Nom"
-              value={formData.nom}
-              onChange={handleChange}
-            />
-          </div>
-          <input
-            type="email"
-            value={user?.email || ''}
-            disabled
-            placeholder="Email (non modifiable)"
-          />
-          <input
-            type="tel"
-            name="telephone"
-            placeholder="Téléphone"
-            value={formData.telephone}
-            onChange={handleChange}
-          />
-        </div>
+                    <div className="form-group">
+                        <label htmlFor="adresse">Adresse</label>
+                        <input
+                            type="text"
+                            id="adresse"
+                            name="adresse"
+                            placeholder="Numéro et nom de rue"
+                            value={formData.adresse}
+                            onChange={handleChange}
+                        />
+                    </div>
 
-        <div className="form-section">
-          <h3>Adresse</h3>
-          <input
-            type="text"
-            name="adresse"
-            placeholder="Adresse"
-            value={formData.adresse}
-            onChange={handleChange}
-          />
-          <div className="input-row">
-            <input
-              type="text"
-              name="ville"
-              placeholder="Ville"
-              value={formData.ville}
-              onChange={handleChange}
-            />
-            <input
-              type="text"
-              name="codePostal"
-              placeholder="Code postal"
-              value={formData.codePostal}
-              onChange={handleChange}
-            />
-          </div>
-          <input
-            type="text"
-            name="pays"
-            placeholder="Pays"
-            value={formData.pays}
-            onChange={handleChange}
-          />
-        </div>
+                    <div className="form-row">
+                        <div className="form-group">
+                            <label htmlFor="ville">Ville</label>
+                            <input
+                                type="text"
+                                id="ville"
+                                name="ville"
+                                placeholder="Ville"
+                                value={formData.ville}
+                                onChange={handleChange}
+                            />
+                        </div>
 
-        <button type="submit" disabled={saving}>
-          {saving ? 'Enregistrement...' : 'Sauvegarder'}
-        </button>
-      </form>
-    </section>
-  );
+                        <div className="form-group">
+                            <label htmlFor="codePostal">Code postal</label>
+                            <input
+                                type="text"
+                                id="codePostal"
+                                name="codePostal"
+                                placeholder="Code postal"
+                                value={formData.codePostal}
+                                onChange={handleChange}
+                            />
+                        </div>
+                    </div>
+
+                    <div className="form-group">
+                        <label htmlFor="pays">Pays</label>
+                        <input
+                            type="text"
+                            id="pays"
+                            name="pays"
+                            placeholder="Pays"
+                            value={formData.pays}
+                            onChange={handleChange}
+                        />
+                    </div>
+                </div>
+
+                <div className="form-actions">
+                    <button type="submit" disabled={saving} className="btn-save">
+                        {saving ? (
+                            <>
+                                <span className="spinner-small"></span>
+                                Enregistrement...
+                            </>
+                        ) : (
+                            <>
+                                <span className="btn-icon">💾</span>
+                                Sauvegarder
+                            </>
+                        )}
+                    </button>
+                </div>
+            </form>
+        </section>
+    );
 }
 
 export default ProfilePage;
