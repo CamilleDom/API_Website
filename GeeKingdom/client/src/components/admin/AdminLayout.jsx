@@ -1,60 +1,77 @@
 import React from 'react';
-import { Outlet, Link, useNavigate } from 'react-router-dom';
+import { Outlet, Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import AdminSidebar from './AdminSidebar';
+import '../../styles/AdminStyles.css';
 
 const AdminLayout = () => {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
+    const { user, logout } = useAuth();
+    const navigate = useNavigate();
 
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-  };
+    const handleLogout = () => {
+        logout();
+        navigate('/');
+    };
 
-  return (
-    <div className="min-h-screen bg-gray-100">
-      {/* Header Admin */}
-      <header className="bg-gray-900 text-white shadow-lg">
-        <div className="flex items-center justify-between px-6 py-4">
-          <div className="flex items-center space-x-4">
-            <Link to="/admin" className="text-2xl font-bold text-purple-400">
-              👑 GeeKingdom Admin
-            </Link>
-          </div>
-          
-          <div className="flex items-center space-x-4">
-            <Link 
-              to="/" 
-              className="text-gray-300 hover:text-white transition"
-            >
-              ← Retour au site
-            </Link>
-            <span className="text-gray-400">|</span>
-            <span className="text-gray-300">
-              {user?.prenom} {user?.nom}
-            </span>
-            <button
-              onClick={handleLogout}
-              className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg transition"
-            >
-              Déconnexion
-            </button>
-          </div>
+    const menuItems = [
+        { path: '/admin', icon: '📊', label: 'Dashboard', exact: true },
+        { path: '/admin/avis', icon: '⭐', label: 'Modération Avis' },
+        { path: '/admin/utilisateurs', icon: '👥', label: 'Utilisateurs' },
+        { path: '/admin/commandes', icon: '📦', label: 'Commandes' },
+        { path: '/admin/produits', icon: '🛍️', label: 'Produits' },
+        { path: '/admin/stocks', icon: '📋', label: 'Stocks' },
+        { path: '/admin/categories', icon: '🏷️', label: 'Catégories' },
+    ];
+
+    return (
+        <div className="admin-layout">
+            {/* Header */}
+            <header className="admin-header">
+                <div className="admin-header-left">
+                    <Link to="/admin" className="admin-logo">
+                        👑 GeeKingdom Admin
+                    </Link>
+                </div>
+
+                <div className="admin-header-right">
+                    <Link to="/" className="admin-back-link">
+                        ← Retour au site
+                    </Link>
+                    <span className="admin-user-name">
+            {user?.prenom} {user?.nom}
+          </span>
+                    <button onClick={handleLogout} className="admin-logout-btn">
+                        Déconnexion
+                    </button>
+                </div>
+            </header>
+
+            <div className="admin-body">
+                {/* Sidebar */}
+                <aside className="admin-sidebar">
+                    <nav className="admin-nav">
+                        {menuItems.map((item) => (
+                            <NavLink
+                                key={item.path}
+                                to={item.path}
+                                end={item.exact}
+                                className={({ isActive }) =>
+                                    `admin-nav-link ${isActive ? 'active' : ''}`
+                                }
+                            >
+                                <span className="nav-icon">{item.icon}</span>
+                                <span>{item.label}</span>
+                            </NavLink>
+                        ))}
+                    </nav>
+                </aside>
+
+                {/* Main Content */}
+                <main className="admin-main">
+                    <Outlet />
+                </main>
+            </div>
         </div>
-      </header>
-
-      <div className="flex">
-        {/* Sidebar */}
-        <AdminSidebar />
-
-        {/* Main Content */}
-        <main className="flex-1 p-8">
-          <Outlet />
-        </main>
-      </div>
-    </div>
-  );
+    );
 };
 
 export default AdminLayout;

@@ -4,221 +4,144 @@ import { GET_AVIS_EN_ATTENTE, GET_AVIS_PAR_STATUT } from '../../graphql/queries'
 import { APPROUVER_AVIS, REJETER_AVIS, SUPPRIMER_AVIS } from '../../graphql/mutations';
 
 const AdminAvisPage = () => {
-  const [activeTab, setActiveTab] = useState('en_attente');
-  const [page, setPage] = useState(0);
-  const [motifRejet, setMotifRejet] = useState('');
-  const [selectedAvis, setSelectedAvis] = useState(null);
+    const [activeTab, setActiveTab] = useState('en_attente');
+    const [page, setPage] = useState(0);
+    const [motifRejet, setMotifRejet] = useState('');
+    const [selectedAvis, setSelectedAvis] = useState(null);
 
-  const { data, loading, refetch } = useQuery(
-    activeTab === 'en_attente' ? GET_AVIS_EN_ATTENTE : GET_AVIS_PAR_STATUT,
-    {
-      variables: activeTab === 'en_attente' 
-        ? { page, size: 10 }
-        : { statut: activeTab, page, size: 10 }
-    }
-  );
+    const { data, loading, refetch } = useQuery(
+        activeTab === 'en_attente' ? GET_AVIS_EN_ATTENTE : GET_AVIS_PAR_STATUT,
+        {
+            variables: activeTab === 'en_attente'
+                ? { page, size: 10 }
+                : { statut: activeTab, page, size: 10 }
+        }
+    );
 
-  const [approuverAvis] = useMutation(APPROUVER_AVIS, {
-    onCompleted: () => refetch()
-  });
+    const [approuverAvis] = useMutation(APPROUVER_AVIS, { onCompleted: () => refetch() });
+    const [rejeterAvis] = useMutation(REJETER_AVIS, {
+        onCompleted: () => { refetch(); setSelectedAvis(null); setMotifRejet(''); }
+    });
+    const [supprimerAvis] = useMutation(SUPPRIMER_AVIS, { onCompleted: () => refetch() });
 
-  const [rejeterAvis] = useMutation(REJETER_AVIS, {
-    onCompleted: () => {
-      refetch();
-      setSelectedAvis(null);
-      setMotifRejet('');
-    }
-  });
+    const handleApprouver = async (id) => {
+        if (window.confirm('Approuver cet avis ?')) {
+            await approuverAvis({ variables: { id: id.toString() } });
+        }
+    };
 
-  const [supprimerAvis] = useMutation(SUPPRIMER_AVIS, {
-    onCompleted: () => refetch()
-  });
+    const handleRejeter = async () => {
+        if (selectedAvis) {
+            await rejeterAvis({ variables: { id: selectedAvis.toString(), motif: motifRejet || null } });
+        }
+    };
 
-  const handleApprouver = async (id) => {
-    if (window.confirm('Approuver cet avis ?')) {
-      await approuverAvis({ variables: { id: id.toString() } });
-    }
-  };
+    const handleSupprimer = async (id) => {
+        if (window.confirm('Supprimer définitivement cet avis ?')) {
+            await supprimerAvis({ variables: { id: id.toString() } });
+        }
+    };
 
-  const handleRejeter = async () => {
-    if (selectedAvis) {
-      await rejeterAvis({ 
-        variables: { 
-          id: selectedAvis.toString(), 
-          motif: motifRejet || null 
-        } 
-      });
-    }
-  };
+    const avisData = activeTab === 'en_attente' ? data?.avisEnAttente : data?.avisParStatut;
 
-  const handleSupprimer = async (id) => {
-    if (window.confirm('Supprimer définitivement cet avis ?')) {
-      await supprimerAvis({ variables: { id: id.toString() } });
-    }
-  };
+    const renderStars = (note) => [...Array(5)].map((_, i) => (
+        <span key={i} className={`star ${i < note ? '' : 'empty'}`}>★</span>
+    ));
 
-  const avisData = activeTab === 'en_attente' 
-    ? data?.avisEnAttente 
-    : data?.avisParStatut;
-
-  const renderStars = (note) => {
-    return '⭐'.repeat(note) + '☆'.repeat(5 - note);
-  };
-
-  return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-bold text-gray-800">Modération des Avis</h1>
-
-      {/* Tabs */}
-      <div className="flex space-x-4 border-b">
-        {[
-          { key: 'en_attente', label: 'En attente', color: 'yellow' },
-          { key: 'approuve', label: 'Approuvés', color: 'green' },
-          { key: 'rejete', label: 'Rejetés', color: 'red' },
-        ].map((tab) => (
-          <button
-            key={tab.key}
-            onClick={() => { setActiveTab(tab.key); setPage(0); }}
-            className={`px-4 py-2 font-medium border-b-2 transition ${
-              activeTab === tab.key
-                ? 'border-purple-500 text-purple-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Loading */}
-      {loading && (
-        <div className="flex justify-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
-        </div>
-      )}
-
-      {/* Liste des avis */}
-      <div className="space-y-4">
-        {avisData?.content?.map((avis) => (
-          <div 
-            key={avis.idAvis}
-            className="bg-white rounded-lg shadow-md p-6"
-          >
-            <div className="flex justify-between items-start">
-              <div className="flex-1">
-                <div className="flex items-center space-x-4 mb-2">
-                  <span className="text-lg">{renderStars(avis.note)}</span>
-                  <span className="text-gray-500 text-sm">
-                    {new Date(avis.dateAvis).toLocaleDateString('fr-FR')}
-                  </span>
-                </div>
-                
-                <p className="text-gray-800 mb-3">{avis.commentaire}</p>
-                
-                <div className="flex items-center space-x-4 text-sm text-gray-500">
-                  <span>👤 {avis.utilisateur?.prenom} {avis.utilisateur?.nom}</span>
-                  <span>|</span>
-                  <span>📧 {avis.utilisateur?.email}</span>
-                  <span>|</span>
-                  <span>🛍️ {avis.produit?.nomProduit}</span>
-                </div>
-              </div>
-
-              {/* Actions */}
-              {activeTab === 'en_attente' && (
-                <div className="flex space-x-2 ml-4">
-                  <button
-                    onClick={() => handleApprouver(avis.idAvis)}
-                    className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition"
-                  >
-                    ✓ Approuver
-                  </button>
-                  <button
-                    onClick={() => setSelectedAvis(avis.idAvis)}
-                    className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition"
-                  >
-                    ✗ Rejeter
-                  </button>
-                </div>
-              )}
-
-              {activeTab !== 'en_attente' && (
-                <button
-                  onClick={() => handleSupprimer(avis.idAvis)}
-                  className="text-red-500 hover:text-red-700 transition"
-                  title="Supprimer"
-                >
-                  🗑️
-                </button>
-              )}
+    return (
+        <div className="admin-page">
+            <div className="admin-page-header">
+                <h1>Modération des Avis</h1>
             </div>
-          </div>
-        ))}
 
-        {avisData?.content?.length === 0 && !loading && (
-          <div className="text-center py-12 text-gray-500">
-            <span className="text-4xl">📭</span>
-            <p className="mt-2">Aucun avis dans cette catégorie</p>
-          </div>
-        )}
-      </div>
-
-      {/* Pagination */}
-      {avisData?.pageInfo && avisData.content?.length > 0 && (
-        <div className="flex justify-between items-center">
-          <p className="text-gray-500">
-            Page {avisData.pageInfo.currentPage + 1} sur {avisData.pageInfo.totalPages}
-            ({avisData.pageInfo.totalElements} avis)
-          </p>
-          <div className="flex space-x-2">
-            <button
-              onClick={() => setPage(p => p - 1)}
-              disabled={!avisData.pageInfo.hasPrevious}
-              className="px-4 py-2 bg-gray-200 rounded-lg disabled:opacity-50"
-            >
-              ← Précédent
-            </button>
-            <button
-              onClick={() => setPage(p => p + 1)}
-              disabled={!avisData.pageInfo.hasNext}
-              className="px-4 py-2 bg-gray-200 rounded-lg disabled:opacity-50"
-            >
-              Suivant →
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Modal Rejet */}
-      {selectedAvis && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h3 className="text-xl font-bold mb-4">Rejeter l'avis</h3>
-            <textarea
-              value={motifRejet}
-              onChange={(e) => setMotifRejet(e.target.value)}
-              placeholder="Motif du rejet (optionnel)"
-              className="w-full border rounded-lg p-3 h-32 mb-4"
-            />
-            <div className="flex justify-end space-x-3">
-              <button
-                onClick={() => { setSelectedAvis(null); setMotifRejet(''); }}
-                className="px-4 py-2 bg-gray-200 rounded-lg"
-              >
-                Annuler
-              </button>
-              <button
-                onClick={handleRejeter}
-                className="px-4 py-2 bg-red-500 text-white rounded-lg"
-              >
-                Confirmer le rejet
-              </button>
+            <div className="admin-filter-tabs">
+                {[
+                    { key: 'en_attente', label: 'En attente' },
+                    { key: 'approuve', label: 'Approuvés' },
+                    { key: 'rejete', label: 'Rejetés' }
+                ].map(tab => (
+                    <button
+                        key={tab.key}
+                        className={`admin-filter-tab ${activeTab === tab.key ? 'active' : ''}`}
+                        onClick={() => { setActiveTab(tab.key); setPage(0); }}
+                    >
+                        {tab.label}
+                    </button>
+                ))}
             </div>
-          </div>
+
+            {loading && <div className="admin-loading"><div className="admin-spinner"></div></div>}
+
+            {!loading && (
+                <div className="admin-cards-grid">
+                    {avisData?.content?.length === 0 ? (
+                        <div className="admin-card">
+                            <div className="panel-empty">
+                                <span className="empty-icon">📭</span>
+                                <p>Aucun avis dans cette catégorie</p>
+                            </div>
+                        </div>
+                    ) : (
+                        avisData?.content?.map((avis) => (
+                            <div key={avis.idAvis} className="admin-card">
+                                <div className="review-card-header">
+                                    <div className="review-rating">{renderStars(avis.note)}</div>
+                                    <span className="review-date">{new Date(avis.dateAvis).toLocaleDateString('fr-FR')}</span>
+                                </div>
+                                <p className="review-content">{avis.commentaire}</p>
+                                <div className="review-meta">
+                                    <div className="review-meta-item"><span className="meta-icon">👤</span><span>{avis.utilisateur?.prenom} {avis.utilisateur?.nom}</span></div>
+                                    <div className="review-meta-item"><span className="meta-icon">✉️</span><span>{avis.utilisateur?.email}</span></div>
+                                    <div className="review-meta-item"><span className="meta-icon">📦</span><span>{avis.produit?.nomProduit}</span></div>
+                                </div>
+                                <div className="review-actions">
+                                    {activeTab === 'en_attente' ? (
+                                        <>
+                                            <button className="admin-btn admin-btn-success" onClick={() => handleApprouver(avis.idAvis)}>✓ Approuver</button>
+                                            <button className="admin-btn admin-btn-danger" onClick={() => setSelectedAvis(avis.idAvis)}>✗ Rejeter</button>
+                                        </>
+                                    ) : (
+                                        <button className="admin-btn admin-btn-danger" onClick={() => handleSupprimer(avis.idAvis)}>🗑️ Supprimer</button>
+                                    )}
+                                </div>
+                            </div>
+                        ))
+                    )}
+                </div>
+            )}
+
+            {avisData?.pageInfo && avisData.content?.length > 0 && (
+                <div className="admin-pagination">
+                    <span className="admin-pagination-info">Page {avisData.pageInfo.currentPage + 1} sur {avisData.pageInfo.totalPages}</span>
+                    <div className="admin-pagination-buttons">
+                        <button className="admin-pagination-btn" onClick={() => setPage(p => p - 1)} disabled={!avisData.pageInfo.hasPrevious}>← Précédent</button>
+                        <button className="admin-pagination-btn" onClick={() => setPage(p => p + 1)} disabled={!avisData.pageInfo.hasNext}>Suivant →</button>
+                    </div>
+                </div>
+            )}
+
+            {selectedAvis && (
+                <div className="admin-modal-overlay" onClick={() => setSelectedAvis(null)}>
+                    <div className="admin-modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="admin-modal-header">
+                            <h2>Rejeter l'avis</h2>
+                            <button className="admin-modal-close" onClick={() => setSelectedAvis(null)}>✕</button>
+                        </div>
+                        <div className="admin-modal-body">
+                            <div className="admin-form-group">
+                                <label className="admin-form-label">Motif du rejet (optionnel)</label>
+                                <textarea className="admin-form-textarea" value={motifRejet} onChange={(e) => setMotifRejet(e.target.value)} placeholder="Expliquez la raison..." rows="4" />
+                            </div>
+                        </div>
+                        <div className="admin-modal-footer">
+                            <button className="admin-btn admin-btn-secondary" onClick={() => setSelectedAvis(null)}>Annuler</button>
+                            <button className="admin-btn admin-btn-danger" onClick={handleRejeter}>Confirmer</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
-      )}
-    </div>
-  );
+    );
 };
 
 export default AdminAvisPage;
