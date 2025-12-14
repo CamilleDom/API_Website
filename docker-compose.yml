@@ -6,10 +6,10 @@ services:
     container_name: geekingdom_mysql
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: root_password_change_me
+      MYSQL_ROOT_PASSWORD: Api_Bdml_2025
       MYSQL_DATABASE: geekingdom_db
       MYSQL_USER: geekingdom_user
-      MYSQL_PASSWORD: geekingdom_pass_change_me
+      MYSQL_PASSWORD: Api_Bdml_2025
     ports:
       - "3306:3306"
     volumes:
@@ -31,7 +31,7 @@ services:
     environment:
       PMA_HOST: mysql
       PMA_PORT: 3306
-      MYSQL_ROOT_PASSWORD: geekingdom_pass_change_me
+      MYSQL_ROOT_PASSWORD: Api_Bdml_2025
     ports:
       - "8081:80"
     depends_on:
