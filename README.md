@@ -14,31 +14,31 @@
 
 ### Création d’un site web de commerce en ligne
 - [x] Naviguer dans les catégories de produits.
-- [ ] Afficher les détails d’un produit (description, prix, photos).
+- [x] Afficher les détails d’un produit (description, prix, photos).
 - [x] Gérer un panier d’achats (ajouter, modifier ou supprimer des articles)
-- [ ] Finaliser une commande avec un système de paiement sécurisé
+- [x] Finaliser une commande avec un système de paiement sécurisé
 ### Développement d’API internes pour les fonctionnalités du site
-- [ ] **Gestion des produits** : récupérer, ajouter, mettre à jour ou supprimer un produit.
-- [ ] **Gestion des commandes** : créer, mettre à jour, annuler et suivre les commandes.
-- [ ] **Gestion des utilisateurs** : inscription, connexion, modification de profil, suppres-
+- [x] **Gestion des produits** : récupérer, ajouter, mettre à jour ou supprimer un produit.
+- [x] **Gestion des commandes** : créer, mettre à jour, annuler et suivre les commandes.
+- [x] **Gestion des utilisateurs** : inscription, connexion, modification de profil, suppres-
 sion de compte et consultation de l’historique des commandes.
-- [ ] **Gestion des stocks** : vérifier et mettre à jour les niveaux de stock après chaque
+- [x] **Gestion des stocks** : vérifier et mettre à jour les niveaux de stock après chaque
 commande.
-- [ ] **Gestion des paiements** : traiter et suivre les transactions
-- [ ] **Gestion des avis clients** : consulter, ajouter ou supprimer les avis et notes des
+- [x] **Gestion des paiements** : traiter et suivre les transactions
+- [x] **Gestion des avis clients** : consulter, ajouter ou supprimer les avis et notes des
 produits.
-- [ ] **Recommandation de produits** : proposer des produits basés sur l’historique
+- [x] **Recommandation de produits** : proposer des produits basés sur l’historique
 d’achat et les préférences utilisateur grâce à un moteur d’IA
-- [ ] **Gestion des livraisons** : suivre et mettre à jour l’état des livraisons
+- [x] **Gestion des livraisons** : suivre et mettre à jour l’état des livraisons
 ### Intégration d’une API externe
-- [ ] Localiser les magasins ou points de retrait proches de l’utilisateur
-- [ ] Proposer des recommandations personnalisées basées sur la position géogra-
+- [x] Localiser les magasins ou points de retrait proches de l’utilisateur
+- [x] Proposer des recommandations personnalisées basées sur la position géogra-
 phique et les préférences
 ### Création d’une documentation API
-- [ ] Fournir une documentation détaillée pour chaque API interne
-- [ ] Permettre à des développeurs tiers d’utiliser ces API pour créer des applications
+- [x] Fournir une documentation détaillée pour chaque API interne
+- [x] Permettre à des développeurs tiers d’utiliser ces API pour créer des applications
 externes.
-- [ ] Utiliser des outils comme Swagger ou Postman pour générer et tester la documen-
+- [x] Utiliser des outils comme Swagger ou Postman pour générer et tester la documen-
 tation
 
 ---
@@ -339,6 +339,12 @@ cd GeeKingdom/client
 npm start
 ```
 
+#### Terminal API - Alternative
+
+```bash
+fix_and_start_api.bat
+```
+
 ### URLs d'acces
 
 | Service | URL | Description |
@@ -384,6 +390,22 @@ curl -X POST http://localhost:8080/auth/login \
     "email": "jean@example.com",
     "password": "password123"
   }'
+```
+
+#### Exemple - Test Connexion web (Client)
+
+```bash
+
+    "email": lucas.dubois@email.fr,
+    "password": qG9SuKXx2ng9X52
+  }'
+```
+
+#### Exemple - Test Connexion web (Admin)
+
+```bash
+    email: admin@geekshop.fr,
+    password: qG9SuKXx2ng9X52
 ```
 
 ### Categories
@@ -964,9 +986,9 @@ SOFTWARE.
 
 ## Contact
 
-- **Email** : votre.email@example.com
-- **GitHub** : https://github.com/votre-username
-- **LinkedIn** : https://linkedin.com/in/votre-profil
+- **Email** : sedik.benmessaoud@efrei.net / camille.dommergue@efrei.net
+- **GitHub** : https://github.com/SDK-Bmd / https://github.com/CamilleDom
+- **LinkedIn** : https://linkedin.com/in/sedik-benmessaoud-data-scientist / https://linkedin.com/in/camille-dommergue-7bb642251/
 
 ---
 
@@ -974,6 +996,6 @@ SOFTWARE.
 
 **Fait avec ❤️ par l'equipe GeeKingdom**
 
-© 2024 GeeKingdom - Tous droits reserves
+© 2025 GeeKingdom - Tous droits reserves
 
 </div>
