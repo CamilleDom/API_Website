@@ -39,6 +39,7 @@ if exist "API_GeeKingdom" (
     echo Demarrage de l'API Spring Boot...
     echo.
     call mvnw.cmd clean compile
+    call mvnw.cmd install -U -DskipTests
     call mvnw.cmd spring-boot:run
     pause
 )
