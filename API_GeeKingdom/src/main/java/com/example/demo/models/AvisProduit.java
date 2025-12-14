@@ -2,6 +2,7 @@ package com.example.demo.models;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @Table(name = "avis_produits")
@@ -34,6 +35,11 @@ public class AvisProduit {
     @Column(name = "utile_count")
     private Integer utileCount = 0;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "id_utilisateur", insertable = false, updatable = false)
+    @JsonIgnoreProperties({"motDePasse", "email", "telephone", "adresse", "codePostal", "ville", "dateInscription", "statut", "role"})
+    private Utilisateur utilisateur;
+
     // Enum
     public enum StatutModeration {
         en_attente, approuve, rejete
@@ -59,6 +65,9 @@ public class AvisProduit {
         }
         this.note = note; 
     }
+
+    public Utilisateur getUtilisateur() { return utilisateur; }
+    public void setUtilisateur(Utilisateur utilisateur) { this.utilisateur = utilisateur; }
 
     public String getCommentaire() { return commentaire; }
     public void setCommentaire(String commentaire) { this.commentaire = commentaire; }

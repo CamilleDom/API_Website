@@ -3,6 +3,7 @@ package com.example.demo.repositories;
 import com.example.demo.models.AvisProduit;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -17,7 +18,7 @@ public interface AvisProduitRepository extends JpaRepository<AvisProduit, Intege
     List<AvisProduit> findByStatutModeration(AvisProduit.StatutModeration statut);
     
     List<AvisProduit> findByIdProduitAndStatutModeration(Integer idProduit, AvisProduit.StatutModeration statut);
-    
+
     boolean existsByIdProduitAndIdUtilisateur(Integer idProduit, Integer idUtilisateur);
     
     @Query("SELECT AVG(a.note) FROM AvisProduit a WHERE a.idProduit = :idProduit AND a.statutModeration = 'approuve'")
@@ -25,4 +26,10 @@ public interface AvisProduitRepository extends JpaRepository<AvisProduit, Intege
     
     @Query("SELECT COUNT(a) FROM AvisProduit a WHERE a.idProduit = :idProduit AND a.statutModeration = 'approuve'")
     Long countApprovedByProduit(Integer idProduit);
+
+    @Query("SELECT a FROM AvisProduit a LEFT JOIN FETCH a.utilisateur WHERE a.idProduit = :idProduit AND a.statutModeration = :statut")
+    List<AvisProduit> findByIdProduitAndStatutModerationWithUtilisateur(
+            @Param("idProduit") Integer idProduit,
+            @Param("statut") AvisProduit.StatutModeration statut
+    );
 }
