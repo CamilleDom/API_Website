@@ -347,14 +347,14 @@ fix_and_start_api.bat
 
 ### URLs d'acces
 
-| Service | URL | Description |
-|---------|-----|-------------|
-| React | http://localhost:3000 | Interface utilisateur |
-| API Spring Boot | http://localhost:8080 | API REST |
-| Node.js | http://localhost:5000 | Serveur intermediaire |
-| MySQL | localhost:3306 | Base de donnees |
-| phpMyAdmin | http://localhost:8081 | Gestion BDD |
-
+| Service         | URL | Description                 |
+|-----------------|-----|-----------------------------|
+| React           | http://localhost:3000 | Interface utilisateur       |
+| API Spring Boot | http://localhost:8080 | API REST                    |
+| Node.js         | http://localhost:5000 | Serveur intermediaire       |
+| MySQL           | localhost:3306 | Base de donnees             |
+| phpMyAdmin      | http://localhost:8081 | Gestion BDD                 |
+| Swagger UI      | http://localhost:8080/swagger-ui/index.html#/ | Interface documentation API |
 ---
 
 ## API Documentation
@@ -992,7 +992,7 @@ SOFTWARE.
 
 ---
 
-<div align="center">
+<div>
 
 **Fait avec ❤️ par l'equipe GeeKingdom**
 
