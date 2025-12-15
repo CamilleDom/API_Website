@@ -7,19 +7,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Contrôleur d'authentification SÉCURISÉ
- * Utilise BCrypt pour le hachage des mots de passe
- *
- * ✅ CORRIGÉ: Gestion complète de l'adresse (adresse, ville, codePostal, pays)
- *
- * @version 2.1 - Sécurité renforcée + Adresse complète
- */
+@Tag(
+        name = "Authentification",
+        description = "Inscription, connexion et gestion du profil utilisateur"
+)
 @RestController
 @RequestMapping("/auth")
 public class UtilisateurController {
@@ -30,12 +34,61 @@ public class UtilisateurController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    /**
-     * 🔐 INSCRIPTION SÉCURISÉE
-     * Hache le mot de passe avec BCrypt avant sauvegarde
-     */
+    @Operation(
+            summary = "Inscription d'un nouvel utilisateur",
+            description = """
+        Crée un nouveau compte utilisateur.
+        - Hash sécurisé du mot de passe avec BCrypt
+        - Vérification de l'unicité de l'email
+        - Rôle 'client' par défaut
+        - Statut 'actif' par défaut
+        """
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Utilisateur créé avec succès",
+                    content = @Content(
+                            examples = @ExampleObject(
+                                    value = """
+                    {
+                      "message": "Utilisateur créé avec succès",
+                      "id": 15
+                    }
+                    """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Données invalides ou email déjà utilisé"
+            )
+    })
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody Utilisateur utilisateur) {
+    public ResponseEntity<?> register(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Données d'inscription de l'utilisateur",
+                    required = true,
+                    content = @Content(
+                            examples = @ExampleObject(
+                                    value = """
+                    {
+                      "nom": "Dupont",
+                      "prenom": "Jean",
+                      "email": "jean.dupont@email.fr",
+                      "motDePasse": "password123",
+                      "telephone": "0612345678",
+                      "adresse": "10 Rue de la Paix",
+                      "ville": "Paris",
+                      "codePostal": "75002",
+                      "pays": "France"
+                    }
+                    """
+                            )
+                    )
+            )
+            @RequestBody Utilisateur utilisateur
+    ) {
         // Validation de l'email
         if (utilisateur.getEmail() == null || utilisateur.getEmail().isEmpty()) {
             return ResponseEntity.badRequest().body(Map.of("error", "Email requis"));
@@ -53,7 +106,7 @@ public class UtilisateurController {
             );
         }
 
-        // 🔐 HASHER LE MOT DE PASSE AVEC BCRYPT
+        // HASHER LE MOT DE PASSE AVEC BCRYPT
         String hashedPassword = passwordEncoder.encode(utilisateur.getMotDePasse());
         utilisateur.setMotDePasse(hashedPassword);
 
@@ -62,7 +115,7 @@ public class UtilisateurController {
         utilisateur.setStatut(Utilisateur.Statut.actif);
         utilisateur.setRole(Utilisateur.Role.client);
 
-        // ✅ Valeur par défaut pour le pays si non fourni
+        // Valeur par défaut pour le pays si non fourni
         if (utilisateur.getPays() == null || utilisateur.getPays().isEmpty()) {
             utilisateur.setPays("France");
         }
@@ -81,13 +134,64 @@ public class UtilisateurController {
         }
     }
 
-    /**
-     * 🔐 CONNEXION SÉCURISÉE
-     * Vérifie le mot de passe avec BCrypt
-     * ✅ CORRIGÉ: Inclut tous les champs d'adresse dans la réponse
-     */
+    @Operation(
+            summary = "Connexion utilisateur",
+            description = """
+        Authentifie un utilisateur et retourne un token JWT.
+        - Vérification sécurisée du mot de passe avec BCrypt
+        - Génération d'un token JWT valide 24h
+        - Mise à jour de la date de dernière connexion
+        """
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Connexion réussie",
+                    content = @Content(
+                            examples = @ExampleObject(
+                                    value = """
+                    {
+                      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                      "user": {
+                        "id": 3,
+                        "nom": "Dubois",
+                        "prenom": "Lucas",
+                        "email": "lucas.dubois@email.fr",
+                        "role": "client",
+                        "statut": "actif"
+                      }
+                    }
+                    """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Identifiants invalides"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Compte désactivé"
+            )
+    })
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody Map<String, String> body) {
+    public ResponseEntity<?> login(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Email et mot de passe",
+                    required = true,
+                    content = @Content(
+                            examples = @ExampleObject(
+                                    value = """
+                    {
+                      "email": "lucas.dubois@email.fr",
+                      "password": "password123"
+                    }
+                    """
+                            )
+                    )
+            )
+            @RequestBody Map<String, String> body
+    ) {
         String email = body.get("email");
         String password = body.get("password");
 
@@ -121,7 +225,6 @@ public class UtilisateurController {
                         "ROLE_" + user.getRole().name().toUpperCase()
                 );
 
-                // ✅ CORRIGÉ: Inclure TOUS les champs dans la réponse (y compris adresse)
                 Map<String, Object> userData = new HashMap<>();
                 userData.put("id", user.getIdUtilisateur());
                 userData.put("nom", user.getNom());
@@ -154,12 +257,20 @@ public class UtilisateurController {
         }
     }
 
-    /**
-     * RÉCUPÉRER LE PROFIL UTILISATEUR
-     * ✅ CORRIGÉ: Inclut tous les champs d'adresse
-     */
+    @Operation(
+            summary = "Récupérer le profil d'un utilisateur",
+            description = "Retourne toutes les informations de profil (sauf le mot de passe)"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Profil récupéré"),
+            @ApiResponse(responseCode = "404", description = "Utilisateur non trouvé")
+    })
+    @SecurityRequirement(name = "JWT")
     @GetMapping("/profile/{id}")
-    public ResponseEntity<?> getProfile(@PathVariable Integer id) {
+    public ResponseEntity<?> getProfile(
+            @Parameter(description = "ID de l'utilisateur", required = true)
+            @PathVariable Integer id
+    ) {
         return utilisateurRepository.findById(id)
                 .map(user -> {
                     Map<String, Object> profile = new HashMap<>();

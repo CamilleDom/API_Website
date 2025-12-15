@@ -7,10 +7,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
 import java.util.List;
 import java.util.Map;
 
+@Tag(name = "Avis", description = "Gestion des avis et notations produits")
 @RestController
 @RequestMapping("/api/avis")
 public class AvisProduitController {
@@ -21,28 +28,44 @@ public class AvisProduitController {
     @Autowired
     private ProduitRepository produitRepository;
 
-    // ✅ LISTE TOUS LES AVIS
+    @Operation(summary = "Liste tous les avis", description = "Admin uniquement")
+    @ApiResponse(responseCode = "200", description = "Liste des avis")
     @GetMapping
     public List<AvisProduit> getAll() {
         return avisRepository.findAll();
     }
 
-    // ✅ AVIS D'UN PRODUIT (approuvés seulement)
+    @Operation(
+            summary = "Avis d'un produit",
+            description = "Retourne uniquement les avis approuvés"
+    )
+    @ApiResponse(responseCode = "200", description = "Liste des avis approuvés")
     @GetMapping("/produit/{idProduit}")
-    public List<AvisProduit> getByProduit(@PathVariable Integer idProduit) {
+    public List<AvisProduit> getByProduit(
+            @Parameter(description = "ID du produit") @PathVariable Integer idProduit
+    ) {
         return avisRepository.findByIdProduitAndStatutModeration(
-            idProduit, 
-            AvisProduit.StatutModeration.approuve
+                idProduit,
+                AvisProduit.StatutModeration.approuve
         );
     }
 
-    // ✅ AVIS D'UN UTILISATEUR
+    @Operation(summary = "Avis d'un utilisateur")
+    @ApiResponse(responseCode = "200", description = "Liste des avis de l'utilisateur")
+    @SecurityRequirement(name = "JWT")
     @GetMapping("/utilisateur/{idUtilisateur}")
-    public List<AvisProduit> getByUtilisateur(@PathVariable Integer idUtilisateur) {
+    public List<AvisProduit> getByUtilisateur(
+            @Parameter(description = "ID de l'utilisateur") @PathVariable Integer idUtilisateur
+    ) {
         return avisRepository.findByIdUtilisateur(idUtilisateur);
     }
 
-    // ✅ AVIS EN ATTENTE DE MODÉRATION
+    @Operation(
+            summary = "Avis en attente de modération",
+            description = "Admin/Modérateur uniquement"
+    )
+    @ApiResponse(responseCode = "200", description = "Avis en attente")
+    @SecurityRequirement(name = "JWT")
     @GetMapping("/moderation")
     public List<AvisProduit> getEnAttente() {
         return avisRepository.findByStatutModeration(AvisProduit.StatutModeration.en_attente);
@@ -73,7 +96,13 @@ public class AvisProduitController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // ✅ CRÉER UN AVIS
+    @Operation(
+            summary = "Créer un avis",
+            description = "Crée l'avis et l'ajoute à la liste des avis a modérer"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Avis créé"),
+    })
     @PostMapping
     public ResponseEntity<?> create(@RequestBody AvisProduit avis) {
         // Vérifier que l'utilisateur n'a pas déjà laissé un avis pour ce produit

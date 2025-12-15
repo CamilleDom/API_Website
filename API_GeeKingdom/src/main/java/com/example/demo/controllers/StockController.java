@@ -7,10 +7,18 @@ import com.example.demo.repositories.MouvementStockRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
 import java.util.List;
 import java.util.Map;
 
+@Tag(name = "Stocks", description = "Gestion des stocks et mouvements")
+@SecurityRequirement(name = "JWT")
 @RestController
 @RequestMapping("/api/stocks")
 public class StockController {
@@ -21,27 +29,42 @@ public class StockController {
     @Autowired
     private MouvementStockRepository mouvementRepository;
 
-    // ✅ LISTE TOUS LES STOCKS
+    @Operation(summary = "Liste tous les stocks")
+    @ApiResponse(responseCode = "200", description = "Liste des stocks")
     @GetMapping
     public List<Stock> getAll() {
         return stockRepository.findAll();
     }
 
-    // ✅ STOCK D'UN PRODUIT
+    @Operation(summary = "Stock d'un produit spécifique")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Stock trouvé"),
+            @ApiResponse(responseCode = "404", description = "Produit sans stock")
+    })
     @GetMapping("/produit/{idProduit}")
-    public ResponseEntity<Stock> getByProduit(@PathVariable Integer idProduit) {
+    public ResponseEntity<Stock> getByProduit(
+            @Parameter(description = "ID du produit") @PathVariable Integer idProduit
+    ) {
         return stockRepository.findByIdProduit(idProduit)
-            .map(ResponseEntity::ok)
-            .orElse(ResponseEntity.notFound().build());
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
-    // ✅ PRODUITS EN RUPTURE
+    @Operation(
+            summary = "Produits en rupture de stock",
+            description = "Produits avec quantité disponible = 0"
+    )
+    @ApiResponse(responseCode = "200", description = "Liste des produits en rupture")
     @GetMapping("/rupture")
     public List<Stock> getEnRupture() {
         return stockRepository.findProduitsEnRupture();
     }
 
-    // ✅ PRODUITS EN ALERTE
+    @Operation(
+            summary = "Produits sous seuil d'alerte",
+            description = "Produits nécessitant un réapprovisionnement"
+    )
+    @ApiResponse(responseCode = "200", description = "Liste des produits en alerte")
     @GetMapping("/alerte")
     public List<Stock> getEnAlerte() {
         return stockRepository.findProduitsEnAlerte();
@@ -78,9 +101,19 @@ public class StockController {
         return ResponseEntity.ok(saved);
     }
 
-    // ✅ AJOUTER DU STOCK (Approvisionnement)
+    @Operation(
+            summary = "Approvisionner un stock",
+            description = "Ajoute de la quantité au stock existant et enregistre le mouvement"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Stock approvisionné"),
+            @ApiResponse(responseCode = "404", description = "Produit non trouvé")
+    })
     @PostMapping("/approvisionner")
-    public ResponseEntity<?> approvisionner(@RequestBody Map<String, Object> request) {
+    public ResponseEntity<?> approvisionner(
+            @Parameter(description = "ID du produit et quantité à ajouter")
+            @RequestBody Map<String, Object> request
+    ) {
         Integer idProduit = (Integer) request.get("idProduit");
         Integer quantite = (Integer) request.get("quantite");
         String commentaire = (String) request.get("commentaire");
@@ -148,9 +181,19 @@ public class StockController {
             .orElse(ResponseEntity.notFound().build());
     }
 
-    // ✅ RÉSERVER DU STOCK (pour commande)
+    @Operation(
+            summary = "Réserver du stock",
+            description = "Réserve du stock pour une commande (diminue disponible, augmente réservé)"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Stock réservé"),
+            @ApiResponse(responseCode = "400", description = "Stock insuffisant")
+    })
     @PostMapping("/reserver")
-    public ResponseEntity<?> reserver(@RequestBody Map<String, Object> request) {
+    public ResponseEntity<?> reserver(
+            @Parameter(description = "ID produit, quantité et ID commande")
+            @RequestBody Map<String, Object> request
+    ) {
         Integer idProduit = (Integer) request.get("idProduit");
         Integer quantite = (Integer) request.get("quantite");
         Integer idCommande = (Integer) request.get("idCommande");
@@ -186,9 +229,16 @@ public class StockController {
             .orElse(ResponseEntity.notFound().build());
     }
 
-    // ✅ LIBÉRER DU STOCK RÉSERVÉ (annulation commande)
+    @Operation(
+            summary = "Libérer du stock réservé",
+            description = "Libère le stock réservé (typiquement lors d'une annulation)"
+    )
+    @ApiResponse(responseCode = "200", description = "Stock libéré")
     @PostMapping("/liberer")
-    public ResponseEntity<?> liberer(@RequestBody Map<String, Object> request) {
+    public ResponseEntity<?> liberer(
+            @Parameter(description = "ID produit, quantité et ID commande")
+            @RequestBody Map<String, Object> request
+    ) {
         Integer idProduit = (Integer) request.get("idProduit");
         Integer quantite = (Integer) request.get("quantite");
         Integer idCommande = (Integer) request.get("idCommande");

@@ -7,12 +7,20 @@ import com.example.demo.repositories.CommandeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+@Tag(name = "Paiements", description = "Gestion des paiements et transactions")
+@SecurityRequirement(name = "JWT")
 @RestController
 @RequestMapping("/api/paiements")
 public class PaiementController {
@@ -23,37 +31,67 @@ public class PaiementController {
     @Autowired
     private CommandeRepository commandeRepository;
 
-    // ✅ LISTE TOUS LES PAIEMENTS
+    @Operation(summary = "Liste tous les paiements", description = "Admin uniquement")
+    @ApiResponse(responseCode = "200", description = "Liste des paiements")
     @GetMapping
     public List<Paiement> getAll() {
         return paiementRepository.findAll();
     }
 
-    // ✅ PAIEMENT PAR ID
+    @Operation(summary = "Détails d'un paiement")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Paiement trouvé"),
+            @ApiResponse(responseCode = "404", description = "Paiement non trouvé")
+    })
     @GetMapping("/{id}")
-    public ResponseEntity<Paiement> getById(@PathVariable Integer id) {
+    public ResponseEntity<Paiement> getById(
+            @Parameter(description = "ID du paiement") @PathVariable Integer id
+    ) {
         return paiementRepository.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // ✅ PAIEMENTS D'UNE COMMANDE
+    @Operation(
+            summary = "Paiements d'une commande",
+            description = "Retourne tous les paiements liés à une commande"
+    )
+    @ApiResponse(responseCode = "200", description = "Liste des paiements")
     @GetMapping("/commande/{idCommande}")
-    public List<Paiement> getByCommande(@PathVariable Integer idCommande) {
+    public List<Paiement> getByCommande(
+            @Parameter(description = "ID de la commande") @PathVariable Integer idCommande
+    ) {
         return paiementRepository.findByIdCommande(idCommande);
     }
 
-    // ✅ PAIEMENT PAR TRANSACTION ID
+    @Operation(summary = "Rechercher un paiement par ID de transaction")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Paiement trouvé"),
+            @ApiResponse(responseCode = "404", description = "Transaction introuvable")
+    })
     @GetMapping("/transaction/{transactionId}")
-    public ResponseEntity<Paiement> getByTransactionId(@PathVariable String transactionId) {
+    public ResponseEntity<Paiement> getByTransactionId(
+            @Parameter(description = "ID de transaction", example = "TXN-ABC123DEF456")
+            @PathVariable String transactionId
+    ) {
         return paiementRepository.findByTransactionId(transactionId)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // ✅ CRÉER UN PAIEMENT
+    @Operation(
+            summary = "Créer un paiement",
+            description = "Génère automatiquement un ID de transaction unique"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Paiement créé"),
+            @ApiResponse(responseCode = "400", description = "Commande introuvable")
+    })
     @PostMapping
-    public ResponseEntity<?> create(@RequestBody Paiement paiement) {
+    public ResponseEntity<?> create(
+            @Parameter(description = "Données du paiement")
+            @RequestBody Paiement paiement
+    ) {
         // Vérifier que la commande existe
         if (!commandeRepository.existsById(paiement.getIdCommande())) {
             return ResponseEntity.badRequest().body(
@@ -70,9 +108,19 @@ public class PaiementController {
         return ResponseEntity.ok(saved);
     }
 
-    // ✅ TRAITER LE PAIEMENT (simulation) - FIXED VERSION
+    @Operation(
+            summary = "Traiter un paiement",
+            description = "Simule le traitement du paiement (90% de succès). Met à jour le statut de la commande si réussi."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Paiement réussi"),
+            @ApiResponse(responseCode = "400", description = "Paiement échoué"),
+            @ApiResponse(responseCode = "404", description = "Paiement non trouvé")
+    })
     @PostMapping("/{id}/traiter")
-    public ResponseEntity<?> traiter(@PathVariable Integer id) {
+    public ResponseEntity<?> traiter(
+            @Parameter(description = "ID du paiement") @PathVariable Integer id
+    ) {
         return paiementRepository.findById(id)
                 .map(paiement -> {
                     // Simulation du traitement (dans la vraie vie, appel à une API de paiement)
@@ -108,9 +156,19 @@ public class PaiementController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // ✅ REMBOURSER UN PAIEMENT
+    @Operation(
+            summary = "Rembourser un paiement",
+            description = "Annule la commande associée"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Paiement remboursé"),
+            @ApiResponse(responseCode = "400", description = "Seuls les paiements réussis peuvent être remboursés"),
+            @ApiResponse(responseCode = "404", description = "Paiement non trouvé")
+    })
     @PostMapping("/{id}/rembourser")
-    public ResponseEntity<?> rembourser(@PathVariable Integer id) {
+    public ResponseEntity<?> rembourser(
+            @Parameter(description = "ID du paiement") @PathVariable Integer id
+    ) {
         return paiementRepository.findById(id)
                 .map(paiement -> {
                     if (paiement.getStatutPaiement() != Paiement.StatutPaiement.reussi) {
@@ -133,7 +191,11 @@ public class PaiementController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // ✅ STATISTIQUES DES PAIEMENTS
+    @Operation(
+            summary = "Statistiques des paiements",
+            description = "Retourne le total, les paiements réussis, échoués, en attente et le taux de réussite"
+    )
+    @ApiResponse(responseCode = "200", description = "Statistiques calculées")
     @GetMapping("/stats")
     public ResponseEntity<?> getStats() {
         long total = paiementRepository.count();
