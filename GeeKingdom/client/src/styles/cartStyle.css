@@ -1,0 +1,112 @@
+/* ========================================
+   FIX: CART ITEM REMOVE BUTTON
+   Ajouter ce CSS à votre fichier components.css
+   ou créer un fichier cart-fix.css et l'importer
+======================================== */
+
+/* Remove Button - Style corrigé */
+.cart-item-remove {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(239, 68, 68, 0.15) !important;
+    border: 1px solid rgba(239, 68, 68, 0.3) !important;
+    border-radius: 8px;
+    color: #ef4444 !important;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 0;
+    flex-shrink: 0;
+}
+
+.cart-item-remove svg {
+    width: 20px;
+    height: 20px;
+    stroke: #ef4444;
+    stroke-width: 2;
+    fill: none;
+}
+
+.cart-item-remove:hover {
+    background: rgba(239, 68, 68, 0.25) !important;
+    border-color: #ef4444 !important;
+    transform: scale(1.1);
+}
+
+.cart-item-remove:hover svg {
+    stroke: #f87171;
+}
+
+/* Assurer que le grid affiche bien le bouton */
+.cart-item {
+    display: grid;
+    grid-template-columns: auto 1fr auto auto auto !important;
+    gap: 1rem;
+    align-items: center;
+}
+
+/* Alternative: Si le bouton utilise la classe btn-remove */
+.btn-remove {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 8px;
+    color: #ef4444;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 0;
+}
+
+.btn-remove svg {
+    width: 20px;
+    height: 20px;
+    stroke: #ef4444;
+    stroke-width: 2;
+    fill: none;
+}
+
+.btn-remove:hover {
+    background: rgba(239, 68, 68, 0.25);
+    border-color: #ef4444;
+    transform: scale(1.1);
+}
+
+/* ========================================
+   RESPONSIVE - Mobile
+======================================== */
+@media (max-width: 768px) {
+    .cart-item {
+        position: relative;
+        padding-right: 60px !important;
+    }
+
+    .cart-item-remove,
+    .btn-remove {
+        position: absolute;
+        top: 50%;
+        right: 12px;
+        transform: translateY(-50%);
+        width: 36px;
+        height: 36px;
+        min-width: 36px;
+    }
+
+    .cart-item-remove svg,
+    .btn-remove svg {
+        width: 18px;
+        height: 18px;
+    }
+
+    .cart-item-remove:hover,
+    .btn-remove:hover {
+        transform: translateY(-50%) scale(1.1);
+    }
+}

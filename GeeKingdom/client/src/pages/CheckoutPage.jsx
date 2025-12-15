@@ -10,6 +10,9 @@ function CheckoutPage() {
     const { user, isAuthenticated } = useAuth();
     const navigate = useNavigate();
 
+    // ✅ FIX: Utiliser optional chaining pour éviter les erreurs si user est undefined
+    const userId = user?.id;
+
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [stockErrors, setStockErrors] = useState([]); // Track stock errors per product
@@ -61,6 +64,9 @@ function CheckoutPage() {
             return;
         }
 
+        // ✅ FIX: Capturer l'userId au moment de la soumission pour éviter les problèmes de contexte
+        const currentUserId = user?.id;
+
         setLoading(true);
         setError('');
         setStockErrors([]);
@@ -77,7 +83,7 @@ function CheckoutPage() {
 
             // ✅ Étape 1: Créer la commande
             const commande = await commandesAPI.create({
-                idUtilisateur: user.id,
+                idUtilisateur: currentUserId,
                 montantTotal: getTotal(),
                 adresseLivraison: livraison.adresse,
                 villeLivraison: livraison.ville,
@@ -124,8 +130,15 @@ function CheckoutPage() {
             // ✅ Étape 4: Traiter le paiement
             await paiementsAPI.traiter(paiementResult.idPaiement);
 
-            // ✅ Étape 5: Vider le panier
-            await clearCart();
+            // ✅ Étape 5: Vider le panier - FIX: Avec gestion d'erreur et fallback
+            try {
+                await clearCart(currentUserId);
+                console.log('✅ Panier vidé avec succès');
+            } catch (clearError) {
+                console.error('⚠️ Erreur lors du vidage du panier:', clearError);
+                // Forcer le vidage local même si l'API échoue
+                localStorage.removeItem('cart');
+            }
 
             // ✅ Étape 6: Rediriger vers la confirmation
             navigate('/order-confirmation', {

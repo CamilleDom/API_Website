@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import Loader from '../components/Loader';
+import '../styles/cartStyle.css';
 
 function CartPage() {
     const { cart, loading, removeFromCart, updateQuantity, getTotal, getItemCount } = useCart();
@@ -98,13 +99,26 @@ function CartPage() {
                                         <span className="total-value">{(item.price * item.quantity).toFixed(2)} €</span>
                                     </div>
 
+                                    {/* ✅ FIX: Bouton de suppression avec icône visible */}
                                     <button
                                         onClick={() => removeFromCart(item.id)}
                                         className="cart-item-remove"
                                         aria-label="Supprimer l'article"
+                                        title="Supprimer du panier"
                                     >
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                            <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        <svg
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeWidth="2"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            style={{ width: '20px', height: '20px' }}
+                                        >
+                                            <polyline points="3 6 5 6 21 6"></polyline>
+                                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                            <line x1="10" y1="11" x2="10" y2="17"></line>
+                                            <line x1="14" y1="11" x2="14" y2="17"></line>
                                         </svg>
                                     </button>
                                 </div>
@@ -135,13 +149,12 @@ function CartPage() {
 
                             <div className="cart-actions">
                                 <Link to="/checkout" className="btn-checkout">
-                                    <span className="btn-icon">💳</span>
-                                    <span className="btn-text">Passer la commande</span>
+                                    <span>💳</span>
+                                    <span>Passer la commande</span>
                                 </Link>
-
                                 <Link to="/products" className="btn-continue">
-                                    <span className="btn-icon">🛍️</span>
-                                    <span className="btn-text">Continuer les achats</span>
+                                    <span>🛍️</span>
+                                    <span>Continuer les achats</span>
                                 </Link>
                             </div>
 
